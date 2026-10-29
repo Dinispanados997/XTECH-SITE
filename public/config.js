@@ -7,8 +7,8 @@
    tudo fica guardado só neste browser e os pagamentos são simulados.
    ===================================================================== */
 window.XTECH_CONFIG = {
-  supabaseUrl: '',      // ex: 'https://abcdefghijkl.supabase.co'
-  supabaseAnonKey: '',  // a chave "anon public" (é pública, pode estar aqui)
+  supabaseUrl: 'https://nzpbrifskoiidfnttziy.supabase.co',
+  supabaseAnonKey: 'sb_publishable_JbQSy0xuZueBNovdWgTs3w_CO0yakwY',  // chave "publishable" / "anon public" (é pública, pode estar aqui)
 
   // Dados da empresa para os Termos e Condições (obrigatórios por lei numa loja online)
   empresa: {
