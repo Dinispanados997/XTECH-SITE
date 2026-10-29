@@ -1,0 +1,7 @@
+{
+  "name": "xtech-loja-online",
+  "private": true,
+  "type": "module",
+  "description": "Xtech Store — site, loja online, pagamentos Stripe e base de dados Supabase",
+  "engines": { "node": ">=18" }
+}
