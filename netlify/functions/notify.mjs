@@ -38,6 +38,8 @@ async function diagnostico() {
     chave_secreta: !key ? 'FALTA' : key.startsWith('sb_publishable') ? 'ERRADA — puseste a publishable; tem de ser a secret (sb_secret_…)' : key.startsWith('sb_secret_') ? 'ok (sb_secret_…)' : key.startsWith('eyJ') ? 'ok (chave antiga service_role)' : `não encontrei uma chave sb_secret_… (o valor tem ${rawKey.length} caracteres e começa por "${rawKey.slice(0, 3)}…")`,
     GMAIL_USER: v('GMAIL_USER') || 'FALTA',
     GMAIL_APP_PASSWORD: v('GMAIL_APP_PASSWORD') ? `definida (${v('GMAIL_APP_PASSWORD').replace(/\s+/g, '').length} caracteres — devem ser 16)` : 'FALTA',
+    STRIPE_SECRET_KEY: !v('STRIPE_SECRET_KEY') ? 'FALTA' : /^sk_test_/.test(v('STRIPE_SECRET_KEY')) ? 'ok — modo de TESTE (sk_test_…)' : /^sk_live_/.test(v('STRIPE_SECRET_KEY')) ? 'ok — pagamentos REAIS (sk_live_…)' : /^rk_/.test(v('STRIPE_SECRET_KEY')) ? 'ok (chave restrita rk_…)' : /^pk_/.test(v('STRIPE_SECRET_KEY')) ? 'ERRADA — puseste a publishable (pk_…); tem de ser a secret (sk_…)' : 'formato estranho',
+    STRIPE_WEBHOOK_SECRET: !v('STRIPE_WEBHOOK_SECRET') ? 'FALTA' : /^whsec_/.test(v('STRIPE_WEBHOOK_SECRET')) ? 'ok (whsec_…)' : 'formato estranho (deve começar por whsec_)',
     email_por: mailProvider() || 'nenhum',
     avisos_para: shopEmail(),
     SITE_URL: siteUrl() || 'FALTA',
