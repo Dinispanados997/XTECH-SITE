@@ -8,7 +8,7 @@
    ===================================================================== */
 window.XTECH_CONFIG = {
   supabaseUrl: 'https://nzpbrifskoiidfnttziy.supabase.co',
-  supabaseAnonKey: 'sb_publishable_JbQSy0xuZueBNovdWgTs3w_CO0yakwY',  // chave "publishable" / "anon public" (é pública, pode estar aqui)
+  supabaseAnonKey: 'sb_publishable_JHZ1cYfRigma7N2JdvAm1A_v6uri9He',  // chave "publishable" / "anon public" (é pública, pode estar aqui)
 
   // Dados da empresa para os Termos e Condições (obrigatórios por lei numa loja online)
   empresa: {
