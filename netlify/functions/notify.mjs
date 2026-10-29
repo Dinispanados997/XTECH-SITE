@@ -17,6 +17,7 @@ export default async (req) => {
     const body = await req.json().catch(() => ({}));
     if (!['order', 'return', 'booking'].includes(body.kind)) return json(400, { error: 'Tipo inválido' });
     const r = await notify(body.kind, Number(body.id));
+    console.log('notify', body.kind, body.id, JSON.stringify(r));
     return json(200, r);
   } catch (e) {
     console.error(e);

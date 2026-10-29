@@ -1,7 +1,7 @@
 // Acesso à base de dados Supabase a partir do servidor (Netlify Functions).
 // Usa a chave "service_role" (secreta, só existe nas variáveis de ambiente do Netlify).
 
-const URL_ = () => (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+const URL_ = () => (process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '').replace(/\/+$/, '');
 const KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export function assertEnv(names) {
