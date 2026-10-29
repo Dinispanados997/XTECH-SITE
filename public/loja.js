@@ -1263,8 +1263,14 @@
     afterGoogleReturn();
     // endereços diretos das páginas legais: /privacidade e /termos (ver netlify.toml)
     const LEGAL_HASH = { '#privacidade':'privacidade', '#termos':'termos', '#devolucoes':'devolucoes', '#garantia':'garantia' };
-    const legalFromHash = ()=>{ const k = LEGAL_HASH[location.hash]; if(!k) return; legal(k); setTimeout(()=>{ const el = document.getElementById('lg-' + k); if(el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100 }); }, 450); };
-    legalFromHash(); window.addEventListener('hashchange', legalFromHash);
+    const legalFromHash = ()=>{ const k = LEGAL_HASH[location.hash]; if(!k) return; legal(k);
+      // espera que a transição de página acabe e só depois desce até à secção
+      let tries = 0; const t = setInterval(()=>{
+        const pg = document.getElementById('page-legal'), el = document.getElementById('lg-' + k);
+        const ready = pg && !pg.classList.contains('hide') && el && el.getBoundingClientRect().top + window.scrollY > 0 && !document.querySelector('.fx-wipe.on');
+        if(ready || ++tries > 40){ clearInterval(t); if(el) setTimeout(()=> window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior:'instant' }), 120); }
+      }, 100); };
+    setTimeout(legalFromHash, 700); window.addEventListener('hashchange', legalFromHash);   // espera o arranque do site
     // link "escolher palavra-passe" (enviado por email, ex.: acesso ao painel de admin)
     const rec = qs.get('recuperar');
     if(rec && LIVE && XDB.auth.verifyRecovery){
