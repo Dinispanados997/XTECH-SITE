@@ -1,11 +1,13 @@
 // Acesso à base de dados Supabase a partir do servidor (Netlify Functions).
 // Usa a chave "service_role" (secreta, só existe nas variáveis de ambiente do Netlify).
 
+const SUPABASE_PROJECT_URL = 'https://nzpbrifskoiidfnttziy.supabase.co';
 // aceita o endereço e a chave mesmo que tenham ficado com texto a mais à volta
 export const URL_ = () => {
   const raw = (process.env.SUPABASE_URL || '').trim();
   const m = raw.match(/https:\/\/[a-z0-9-]+\.supabase\.(co|in)/i);
-  return m ? m[0] : raw.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+  // se a variável não tiver um endereço válido, usa o do projeto da loja (é público, está também no config.js)
+  return m ? m[0] : SUPABASE_PROJECT_URL;
 };
 export const KEY = () => {
   // SUPABASE_SECRET_KEY (nova) tem prioridade; SUPABASE_SERVICE_ROLE_KEY continua a funcionar
@@ -16,7 +18,7 @@ export const KEY = () => {
 };
 
 export function assertEnv(names) {
-  const miss = names.filter(n => !process.env[n] && !(n === 'SUPABASE_SERVICE_ROLE_KEY' && process.env.SUPABASE_SECRET_KEY));
+  const miss = names.filter(n => !process.env[n] && !(n === 'SUPABASE_SERVICE_ROLE_KEY' && process.env.SUPABASE_SECRET_KEY) && n !== 'SUPABASE_URL');
   if (miss.length) throw new Error('Falta configurar no Netlify: ' + miss.join(', '));
 }
 
@@ -123,7 +125,7 @@ export async function guardaAdmin(req, { porMinuto = 30 } = {}) {
   if (!rows || !rows.length) return json(403, { error: 'Só a equipa pode usar isto.' });
   return null;
 }
-export const supabaseLigado = () => !!(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY));
+export const supabaseLigado = () => !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
 
 // ---------------------------------------------------------------- emails automáticos
 const TABLES = ['orders', 'returns', 'bookings'];

@@ -5,7 +5,7 @@ import { bookingsOn } from '../lib/db.mjs';
 import { notify } from '../lib/notify-core.mjs';
 
 export default async () => {
-  if (!process.env.SUPABASE_URL || !(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)) return new Response('sem base de dados');
+  if (!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)) return new Response('sem base de dados');
   const X = globalThis.XEmails;
   const tomorrow = X.addDays(X.lisbonToday(), 1);
   const list = await bookingsOn(tomorrow);
