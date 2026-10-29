@@ -31,10 +31,11 @@ export default async (req) => {
 
 async function diagnostico() {
   const v = (k) => (process.env[k] || '').trim();
-  const key = KEY(), rawKey = v('SUPABASE_SERVICE_ROLE_KEY');
+  const key = KEY(), rawKey = v('SUPABASE_SECRET_KEY') || v('SUPABASE_SERVICE_ROLE_KEY');
   const out = {
     SUPABASE_URL: URL_() || 'FALTA',
-    SUPABASE_SERVICE_ROLE_KEY: !key ? 'FALTA' : key.startsWith('sb_publishable') ? 'ERRADA — puseste a publishable; tem de ser a secret (sb_secret_…)' : key.startsWith('sb_secret_') ? 'ok (sb_secret_…)' : key.startsWith('eyJ') ? 'ok (chave antiga service_role)' : `não encontrei uma chave sb_secret_… (o valor tem ${rawKey.length} caracteres e começa por "${rawKey.slice(0, 3)}…")`,
+    SUPABASE_SECRET_KEY: v('SUPABASE_SECRET_KEY') ? 'definida' : 'não definida',
+    chave_secreta: !key ? 'FALTA' : key.startsWith('sb_publishable') ? 'ERRADA — puseste a publishable; tem de ser a secret (sb_secret_…)' : key.startsWith('sb_secret_') ? 'ok (sb_secret_…)' : key.startsWith('eyJ') ? 'ok (chave antiga service_role)' : `não encontrei uma chave sb_secret_… (o valor tem ${rawKey.length} caracteres e começa por "${rawKey.slice(0, 3)}…")`,
     GMAIL_USER: v('GMAIL_USER') || 'FALTA',
     GMAIL_APP_PASSWORD: v('GMAIL_APP_PASSWORD') ? `definida (${v('GMAIL_APP_PASSWORD').replace(/\s+/g, '').length} caracteres — devem ser 16)` : 'FALTA',
     email_por: mailProvider() || 'nenhum',

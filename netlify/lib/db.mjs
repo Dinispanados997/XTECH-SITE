@@ -8,13 +8,15 @@ export const URL_ = () => {
   return m ? m[0] : raw.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 };
 export const KEY = () => {
-  const raw = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  // SUPABASE_SECRET_KEY (nova) tem prioridade; SUPABASE_SERVICE_ROLE_KEY continua a funcionar
+  const pick = (k) => { const r = (process.env[k] || '').trim(); return /sb_secret_|^eyJ/.test(r) ? r : ''; };
+  const raw = pick('SUPABASE_SECRET_KEY') || pick('SUPABASE_SERVICE_ROLE_KEY') || (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '').trim();
   const m = raw.match(/sb_secret_[A-Za-z0-9_-]+/) || raw.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
   return m ? m[0] : raw;
 };
 
 export function assertEnv(names) {
-  const miss = names.filter(n => !process.env[n]);
+  const miss = names.filter(n => !process.env[n] && !(n === 'SUPABASE_SERVICE_ROLE_KEY' && process.env.SUPABASE_SECRET_KEY));
   if (miss.length) throw new Error('Falta configurar no Netlify: ' + miss.join(', '));
 }
 
@@ -121,7 +123,7 @@ export async function guardaAdmin(req, { porMinuto = 30 } = {}) {
   if (!rows || !rows.length) return json(403, { error: 'Só a equipa pode usar isto.' });
   return null;
 }
-export const supabaseLigado = () => !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+export const supabaseLigado = () => !!(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY));
 
 // ---------------------------------------------------------------- emails automáticos
 const TABLES = ['orders', 'returns', 'bookings'];
