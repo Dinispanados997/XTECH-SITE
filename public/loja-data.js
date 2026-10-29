@@ -212,6 +212,11 @@
       },
       async signOut(){ await sb.auth.signOut(); session = null; },
       async resetPassword(email){ const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if(error) throw error; },
+      // entrar com a conta Google (volta ao site já com sessão iniciada)
+      async signInWithGoogle(){
+        const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + location.pathname, queryParams:{ prompt:'select_account' } } });
+        if(error) throw new Error(/not enabled|provider/i.test(error.message) ? 'O login com Google ainda não está ativo. Usa o email por agora.' : error.message);
+      },
       async verifyRecovery(token_hash){ const { error } = await sb.auth.verifyOtp({ token_hash, type:'recovery' }); if(error) throw new Error(/expired|invalid/i.test(error.message) ? 'Este link já expirou ou já foi usado. Pede um novo.' : error.message); session = (await sb.auth.getSession()).data.session; return userOut(); },
       async setPassword(password){ const { error } = await sb.auth.updateUser({ password }); if(error) throw error; },
       async updateMeta(meta){ const { data, error } = await sb.auth.updateUser({ data: meta }); if(error) throw error; session = (await sb.auth.getSession()).data.session; return userOut(); },
@@ -326,6 +331,7 @@
       },
       async signOut(){ demoUser = null; await dset('demo_session', null); emit('auth', { event:'SIGNED_OUT', user:null }); },
       async resetPassword(){ throw new Error('No modo demonstração não há envio de emails.'); },
+      async signInWithGoogle(){ throw new Error('No modo demonstração o login com Google não funciona — no site real abre a janela da Google.'); },
       async setPassword(p){ const users = await dlist('demo_users'); const u = users.find(x=>x.id===demoUser.id); if(u){ u.pass = p; await dsave('demo_users', users); } },
       async updateMeta(meta){
         const users = await dlist('demo_users'); const u = users.find(x=>x.id===demoUser.id);

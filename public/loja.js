@@ -202,6 +202,26 @@
     try{ renderNavAccount(); }catch(e){}
   }
 
+  const GOOGLE_BTN = (attr)=> `<button type="button" class="xs-btn block xs-google" ${attr}><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>`;
+  // guarda onde a pessoa estava, para voltar lá depois da janela da Google
+  async function googleLogin(){
+    try{
+      const vis = document.querySelector('.site-page:not(.hide)');
+      try{ sessionStorage.setItem('xtech_after_google', vis ? vis.id : ''); }catch(e){}
+      await XDB.auth.signInWithGoogle();
+    }catch(e){ toast(e.message); }
+  }
+  function afterGoogleReturn(){
+    let where = ''; try{ where = sessionStorage.getItem('xtech_after_google') || ''; sessionStorage.removeItem('xtech_after_google'); }catch(e){}
+    if(!where || !user) return;
+    toast(`Olá, ${user.name.split(' ')[0]}!`);
+    setTimeout(()=>{   // espera que o resto do site (ex.: marcações) acabe de arrancar
+      if(where === 'page-checkout') showPage('checkout');
+      else if(where === 'page-marcar' && window.Agenda) window.Agenda.open();
+      else if(where === 'account-page') showPage('account');
+    }, 350);
+  }
+
   let afterLogin = null;
   function openAuth(mode, then){
     afterLogin = then || null;
@@ -215,6 +235,8 @@
         <div id="xa-msg"></div>
         <button class="xs-btn block" id="xa-go">Enviar link</button>
         <p style="text-align:center;margin:14px 0 0"><button class="xs-link" onclick="Shop.openAuth('login')">Voltar a entrar</button></p>` : `
+        ${GOOGLE_BTN('data-google="1"')}
+        <div class="xs-or"><span>ou com email</span></div>
         <div class="xs-seg"><button class="${mode==='login'?'on':''}" onclick="Shop.openAuth('login')">Entrar</button><button class="${mode==='signup'?'on':''}" onclick="Shop.openAuth('signup')">Criar conta</button></div>
         ${mode==='signup' ? `<div class="xs-in"><label>Nome</label><input id="xa-name" autocomplete="name" placeholder="O teu nome"></div>` : ''}
         <div class="xs-in"><label>Email</label><input id="xa-email" type="email" autocomplete="email" placeholder="email@exemplo.com"></div>
@@ -223,6 +245,7 @@
         <button class="xs-btn block" id="xa-go">${mode==='signup' ? 'Criar conta' : 'Entrar'}</button>
         ${mode==='login' ? `<p style="text-align:center;margin:14px 0 0"><button class="xs-link" onclick="Shop.openAuth('reset')">Esqueci-me da palavra-passe</button></p>` : `<p class="xs-muted" style="font-size:12.5px;text-align:center;margin:14px 0 0">Com a conta acompanhas encomendas, devoluções e reparações.</p>`}`}
     </div>`);
+    const gb = $('.xs-modal [data-google]'); if(gb) gb.onclick = ()=> googleLogin();
     const go = $('#xa-go'), msg = $('#xa-msg');
     const submit = async ()=>{
       const email = ($('#xa-email').value||'').trim().toLowerCase();
@@ -328,6 +351,8 @@
           <section class="xs-card"><h2><i>1</i>A tua conta</h2>
             ${user ? `<div class="xs-user"><div class="xs-av">${esc((user.name||'?')[0].toUpperCase())}</div><div><b>${esc(user.name)}</b><div class="xs-muted" style="font-size:13.5px">${esc(user.email)}</div></div><span class="xs-sp"></span><button class="xs-link" data-co="logout">Não sou eu</button></div>`
                    : `<p class="xs-muted" style="margin:0 0 14px;font-size:14.5px;line-height:1.5">Entra ou cria conta para acompanhares a encomenda, pedires devoluções e veres o histórico.</p>
+                      ${GOOGLE_BTN('data-co="google"')}
+                      <div class="xs-or"><span>ou com email</span></div>
                       <div class="xs-row"><button class="xs-btn" data-co="login">Entrar</button><button class="xs-btn ghost" data-co="signup">Criar conta</button></div>`}
           </section>
 
@@ -384,6 +409,7 @@
       const a = e.target.closest('[data-co]'); if(!a) return;
       const act = a.dataset.co;
       if(act === 'login' || act === 'signup') openAuth(act, ()=> showPage('checkout'));
+      if(act === 'google') googleLogin();
       if(act === 'logout') logout().then(()=> showPage('checkout'));
       if(act === 'submit') submitOrder();
     });
@@ -1234,6 +1260,7 @@
     mountCartUI(); wire();
     // regresso da página de pagamento do Stripe
     const qs = new URLSearchParams(location.search);
+    afterGoogleReturn();
     // link "escolher palavra-passe" (enviado por email, ex.: acesso ao painel de admin)
     const rec = qs.get('recuperar');
     if(rec && LIVE && XDB.auth.verifyRecovery){
@@ -1253,7 +1280,7 @@
     }
   }
 
-  window.Shop = { openCart, closeCart, quickAdd:(t,id)=> addToCart(t, id, {}, 1), addFromProductPage:(t,id,opts)=> addToCart(t, id, opts, 1),
+  window.Shop = { googleLogin, openCart, closeCart, quickAdd:(t,id)=> addToCart(t, id, {}, 1), addFromProductPage:(t,id,opts)=> addToCart(t, id, opts, 1),
     openAuth, openAccount, legal, payAgain, showThanks, _cart:()=>cart };
   start();
 })();

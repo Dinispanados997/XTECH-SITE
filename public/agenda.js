@@ -202,7 +202,7 @@
         <div class="xs-in"><label for="ag-phone">Telemóvel</label><input id="ag-phone" data-f="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" value="${esc(st.phone)}" placeholder="9xx xxx xxx"></div>
         <div class="xs-in"><label for="ag-email">Email <span class="ag-opt">(recebes lá a confirmação)</span></label><input id="ag-email" data-f="email" type="email" autocomplete="email" maxlength="120" value="${esc(st.email)}" placeholder="nome@email.com"></div>
       </div>
-      ${u ? '' : `<p class="ag-note">Tens conta? <button class="xs-link" data-ag="login">Entra</button> para veres e gerires as tuas marcações.</p>`}`;
+      ${u ? '' : `<p class="ag-note">Tens conta? <button class="xs-link" data-ag="login">Entra</button> ou <button class="xs-link" data-ag="google">continua com Google</button> para preencher os dados e gerires as tuas marcações.</p>`}`;
   }
 
   function drawSum(){
@@ -253,6 +253,7 @@
     if(a === 'dprev' || a === 'dnext'){ const box = $('#ag-days'); box.scrollBy({ left:(a==='dnext'?1:-1) * box.clientWidth * .8, behavior:'smooth' }); }
     if(a === 'login') Shop.openAuth('login', ()=>{ st.filledFor = null; prefill(); drawYou(); });
     if(a === 'privacy') Shop.legal('privacidade');
+    if(a === 'google') Shop.googleLogin();
     if(a === 'send') send();
     if(a === 'ics') downloadIcs(st.done);
     if(a === 'again'){ st.done = null; st.service = null; st.day = null; st.slot = null; st.model = ''; st.devType = ''; st.issue = ''; renderPage(); window.scrollTo(0,0); }
