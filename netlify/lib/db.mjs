@@ -14,7 +14,8 @@ async function rest(path, { method = 'GET', body, prefer } = {}) {
     method,
     headers: {
       apikey: KEY(),
-      Authorization: `Bearer ${KEY()}`,
+      // chaves antigas (JWT) também vão no Authorization; as novas "sb_secret_…" só no apikey
+      ...(KEY().startsWith('sb_') ? {} : { Authorization: `Bearer ${KEY()}` }),
       'Content-Type': 'application/json',
       ...(prefer ? { Prefer: prefer } : {}),
     },
