@@ -73,8 +73,20 @@ export function buildMime({ fromName, from, to, replyTo, subject, html, text }) 
     `--${boundary}--\r\n`;
 }
 
+// só para o diagnóstico: entra no Gmail e sai, sem enviar nada
+export async function mailLoginTest() {
+  const p = mailProvider();
+  if (!p) return 'sem email configurado (faltam GMAIL_USER / GMAIL_APP_PASSWORD)';
+  if (p === 'resend') return 'resend (não testado)';
+  const cfg = p === 'gmail'
+    ? { host: 'smtp.gmail.com', port: 465, user: env('GMAIL_USER'), pass: env('GMAIL_APP_PASSWORD').replace(/\s+/g, '') }
+    : { host: env('SMTP_HOST'), port: Number(env('SMTP_PORT')) || 465, user: env('SMTP_USER'), pass: env('SMTP_PASS') };
+  try { await smtpSend({ ...cfg, from: cfg.user, to: cfg.user, raw: '', loginOnly: true }); return 'ok — o Gmail aceitou o login'; }
+  catch (e) { return 'ERRO: ' + e.message; }
+}
+
 /* ------------------------------------------------------------------ cliente SMTP (SSL, porta 465) */
-function smtpSend({ host, port, user, pass, from, to, raw }) {
+function smtpSend({ host, port, user, pass, from, to, raw, loginOnly }) {
   return new Promise((resolve, reject) => {
     let buf = '', waiting = null, done = false;
     const sock = tls.connect({ host, port, servername: host });
@@ -106,6 +118,7 @@ function smtpSend({ host, port, user, pass, from, to, raw }) {
       await step('AUTH LOGIN', 334);
       await step(b64(user), 334, true);
       await step(b64(pass), 235, true);
+      if (loginOnly) { sock.write('QUIT\r\n'); done = true; sock.end(); resolve(true); return; }
       await step(`MAIL FROM:<${from}>`, 250);
       await step(`RCPT TO:<${to}>`, 25);
       await step('DATA', 354);

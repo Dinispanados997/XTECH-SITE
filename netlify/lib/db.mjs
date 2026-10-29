@@ -128,3 +128,8 @@ export async function rpc(name, args) {
 export async function bookingsOn(day) {
   return (await rest(`bookings?day=eq.${encodeURIComponent(day)}&status=in.(pendente,confirmada)&select=id`)) || [];
 }
+
+// só para o diagnóstico: últimas marcações (sem dados pessoais)
+export async function lastBookings() {
+  return (await rest('bookings?select=id,number,day,slot,status,emails,created_at&order=id.desc&limit=5')) || [];
+}
