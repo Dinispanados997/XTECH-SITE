@@ -212,6 +212,7 @@
       },
       async signOut(){ await sb.auth.signOut(); session = null; },
       async resetPassword(email){ const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if(error) throw error; },
+      async verifyRecovery(token_hash){ const { error } = await sb.auth.verifyOtp({ token_hash, type:'recovery' }); if(error) throw new Error(/expired|invalid/i.test(error.message) ? 'Este link já expirou ou já foi usado. Pede um novo.' : error.message); session = (await sb.auth.getSession()).data.session; return userOut(); },
       async setPassword(password){ const { error } = await sb.auth.updateUser({ password }); if(error) throw error; },
       async updateMeta(meta){ const { data, error } = await sb.auth.updateUser({ data: meta }); if(error) throw error; session = (await sb.auth.getSession()).data.session; return userOut(); },
       token: ()=> session && session.access_token,

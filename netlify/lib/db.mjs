@@ -146,3 +146,19 @@ export async function bookingsOn(day) {
 export async function lastBookings() {
   return (await rest('bookings?select=id,number,day,slot,status,emails,created_at&order=id.desc&limit=5')) || [];
 }
+
+// ---------------------------------------------------------------- contas (Supabase Auth, só no servidor)
+export async function authAdmin(path, { method = 'GET', body } = {}) {
+  const res = await fetch(`${URL_()}/auth/v1/${path}`, {
+    method,
+    headers: { apikey: KEY(), ...(KEY().startsWith('sb_') ? {} : { Authorization: `Bearer ${KEY()}` }), 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let data = null; try { data = text ? JSON.parse(text) : null; } catch (_) { data = { raw: text }; }
+  if (!res.ok) { const e = new Error(`Auth ${res.status}: ${(data && (data.msg || data.message || data.error_description || data.error)) || text}`); e.status = res.status; throw e; }
+  return data;
+}
+export async function addStaff(email, name, role) {
+  await rest('staff?on_conflict=email', { method: 'POST', body: [{ email, name, role }], prefer: 'resolution=merge-duplicates,return=minimal' });
+}

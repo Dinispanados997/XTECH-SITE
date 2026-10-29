@@ -263,14 +263,14 @@
     setTimeout(()=>{ const f = $('.xs-modal input'); if(f) f.focus(); }, 60);
   }
 
-  function openNewPassword(){
+  function openNewPassword(after){
     renderModal(`<div class="modal-box xs-modal">
       <div class="modal-head"><h3>Nova palavra-passe</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
       <div class="xs-in"><label>Nova palavra-passe</label><input id="xn-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
       <div id="xn-msg"></div><button class="xs-btn block" id="xn-go">Guardar</button></div>`);
     $('#xn-go').onclick = async ()=>{
       const p = $('#xn-pass').value; if(p.length < 8){ $('#xn-msg').innerHTML = `<div class="xs-alert">Mínimo 8 caracteres.</div>`; return; }
-      try{ await XDB.auth.setPassword(p); closeModal(); toast('Palavra-passe atualizada.'); }
+      try{ await XDB.auth.setPassword(p); closeModal(); toast('Palavra-passe atualizada.'); if(typeof after === 'function') after(); }
       catch(e){ $('#xn-msg').innerHTML = `<div class="xs-alert">${esc(e.message)}</div>`; }
     };
   }
@@ -1234,6 +1234,16 @@
     mountCartUI(); wire();
     // regresso da página de pagamento do Stripe
     const qs = new URLSearchParams(location.search);
+    // link "escolher palavra-passe" (enviado por email, ex.: acesso ao painel de admin)
+    const rec = qs.get('recuperar');
+    if(rec && LIVE && XDB.auth.verifyRecovery){
+      history.replaceState(null, '', location.pathname + location.hash);
+      try{
+        await XDB.auth.verifyRecovery(rec); syncSession();
+        const admin = qs.get('admin') === '1';
+        openNewPassword(admin ? ()=>{ if(typeof showAdminLogin === 'function') showAdminLogin(); } : null);
+      }catch(e){ toast(e.message); }
+    }
     const oid = +qs.get('encomenda');
     if(oid){
       const state = qs.get('pagamento') || 'ok';

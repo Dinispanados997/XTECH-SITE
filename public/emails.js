@@ -204,6 +204,10 @@
       intro:['Marcada pelo site. Confirma no painel ou manda mensagem ao cliente.'],
       blocks:[{ date:b }, { rows:[['Cliente', b.name], ['Telemóvel', phoneFmt(b.phone)], ['Email', b.email || '—'], ['Serviço', b.service_label || '—']].concat(b.device ? [['Equipamento', b.device]] : []).concat(b.issue ? [['Problema', b.issue]] : []) },
         { button:['Abrir o painel', c.siteUrl] }] }; },
+    admin_acesso: function(u, c){ return { subject:'Acesso ao painel da Xtech Store', pre:'Escolhe a tua palavra-passe para entrar no painel.',
+      eyebrow:'Painel de administração', title:'Escolhe a tua palavra-passe.',
+      intro:['A conta <b>' + esc(u.email) + '</b> já é administradora do site da Xtech Store.', 'Carrega no botão, escolhe uma palavra-passe e entras logo no painel. O link só funciona uma vez e expira em 1 hora.'],
+      blocks:[{ button:['Escolher palavra-passe', c.link] }, { note:'Se não foste tu a pedir isto, ignora este email — sem carregares no botão, nada muda.' }] }; },
     shop_booking_cancel: function(b, c){ return { subject:'Marcação desmarcada: ' + b.name + ' — ' + dayShort(b.day) + ' às ' + b.slot, pre:'O horário ficou livre.',
       eyebrow:'Marcações', title:'Um cliente desmarcou',
       intro:['<b>' + esc(b.name) + '</b> desmarcou ' + esc(b.service_label || 'a marcação') + ' de ' + esc(dayLong(b.day)) + ' às ' + esc(b.slot) + '. O horário voltou a ficar livre no site.'],
@@ -258,7 +262,7 @@
 
   function render(ev, rec, ctx){
     ctx = ctx || {};
-    var c = { siteUrl:String(ctx.siteUrl || '').replace(/\/$/, '') + '/', mb:ctx.mb, order:ctx.order };
+    var c = { siteUrl:String(ctx.siteUrl || '').replace(/\/$/, '') + '/', mb:ctx.mb, order:ctx.order, link:ctx.link };
     var m = T[ev.tpl](rec, c);
     var logo = ctx.logoUrl || (c.siteUrl + 'icon-192.png');
     var body = m.blocks.map(function(b){
