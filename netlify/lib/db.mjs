@@ -1,8 +1,17 @@
 // Acesso à base de dados Supabase a partir do servidor (Netlify Functions).
 // Usa a chave "service_role" (secreta, só existe nas variáveis de ambiente do Netlify).
 
-const URL_ = () => (process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '').replace(/\/+$/, '');
-const KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// aceita o endereço e a chave mesmo que tenham ficado com texto a mais à volta
+export const URL_ = () => {
+  const raw = (process.env.SUPABASE_URL || '').trim();
+  const m = raw.match(/https:\/\/[a-z0-9-]+\.supabase\.(co|in)/i);
+  return m ? m[0] : raw.replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+};
+export const KEY = () => {
+  const raw = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  const m = raw.match(/sb_secret_[A-Za-z0-9_-]+/) || raw.match(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/);
+  return m ? m[0] : raw;
+};
 
 export function assertEnv(names) {
   const miss = names.filter(n => !process.env[n]);
