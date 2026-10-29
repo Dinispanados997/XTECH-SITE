@@ -797,7 +797,7 @@
       <h2 id="lg-garantia">Garantia</h2>
       <p>Nos termos do Decreto-Lei n.º 84/2021, os equipamentos usados têm 18 meses de garantia e os artigos novos (incluindo acessórios) têm 3 anos de garantia, a contar da entrega. Em caso de avaria, contacta-nos com o número da encomenda ou passa na loja; o diagnóstico é gratuito.</p>
       <h2 id="lg-privacidade">Política de Privacidade</h2>
-      <p>Usamos os teus dados (nome, email, telemóvel, morada, NIF) apenas para processar encomendas, reparações, faturação e apoio ao cliente. Os dados ficam guardados em servidores na UE (Supabase) e os pagamentos são processados pela Stripe. Não vendemos dados a terceiros. Podes pedir acesso, correção ou eliminação dos teus dados através de ${STORE.email}.</p>
+      <p>Usamos os teus dados (nome, email, telemóvel, morada, NIF) apenas para processar encomendas, marcações, reparações, faturação e apoio ao cliente, e para te enviar emails sobre esses pedidos (confirmações, avisos e lembretes). Se entrares com a conta Google, recebemos apenas o teu nome, email e foto de perfil, que usamos só para criar e identificar a tua conta. Os dados ficam guardados em servidores na UE (Supabase) e os pagamentos são processados pela Stripe. Não vendemos dados a terceiros. Podes pedir acesso, correção ou eliminação dos teus dados através de ${STORE.email}.</p>
       <h2 id="lg-litigios">Resolução de litígios</h2>
       <p>Livro de Reclamações Eletrónico: <a href="https://www.livroreclamacoes.pt" target="_blank" rel="noopener" style="color:#fff">www.livroreclamacoes.pt</a>. Em caso de litígio de consumo, podes recorrer a uma entidade de Resolução Alternativa de Litígios, como o CIAB — Centro de Informação, Mediação e Arbitragem de Consumo (Tribunal Arbitral de Consumo), <a href="https://www.ciab.pt" target="_blank" rel="noopener" style="color:#fff">www.ciab.pt</a>. Mais informação no Portal do Consumidor: <a href="https://www.consumidor.gov.pt" target="_blank" rel="noopener" style="color:#fff">www.consumidor.gov.pt</a>.</p>
     </div>`;
@@ -1261,6 +1261,10 @@
     // regresso da página de pagamento do Stripe
     const qs = new URLSearchParams(location.search);
     afterGoogleReturn();
+    // endereços diretos das páginas legais: /privacidade e /termos (ver netlify.toml)
+    const LEGAL_HASH = { '#privacidade':'privacidade', '#termos':'termos', '#devolucoes':'devolucoes', '#garantia':'garantia' };
+    const legalFromHash = ()=>{ const k = LEGAL_HASH[location.hash]; if(!k) return; legal(k); setTimeout(()=>{ const el = document.getElementById('lg-' + k); if(el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100 }); }, 450); };
+    legalFromHash(); window.addEventListener('hashchange', legalFromHash);
     // link "escolher palavra-passe" (enviado por email, ex.: acesso ao painel de admin)
     const rec = qs.get('recuperar');
     if(rec && LIVE && XDB.auth.verifyRecovery){

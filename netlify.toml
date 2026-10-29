@@ -19,3 +19,14 @@
   for = "/img/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# endereços curtos para as páginas legais (pedidos pelo Google para o login com Google)
+[[redirects]]
+  from = "/privacidade"
+  to = "/#privacidade"
+  status = 301
+
+[[redirects]]
+  from = "/termos"
+  to = "/#termos"
+  status = 301
