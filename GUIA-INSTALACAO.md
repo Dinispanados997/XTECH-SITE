@@ -209,6 +209,35 @@ Os emails saem do teu Gmail (**xtechstorept@gmail.com**). Ficam na pasta **Envia
 
 ---
 
+## Se alguma coisa não funcionar
+
+**1. Diagnóstico.** Abre no browser:
+`https://xtechstore.netlify.app/.netlify/functions/notify?diagnostico=1`
+
+Mostra se o Supabase, o Gmail, o Stripe e a IA estão bem configurados. Não mostra nenhuma palavra-passe. Tudo o que diz **FALTA** ou **ERRO** é o que tens de corrigir nas variáveis do Netlify. Depois de corrigires, faz **Deploys → Trigger deploy**.
+
+**2. Acesso ao painel perdido.** Abre:
+`https://xtechstore.netlify.app/.netlify/functions/setup-admin`
+- Cria ou confirma a conta do email da loja e põe-na como administradora.
+- Manda para esse Gmail um link para escolheres a palavra-passe.
+- Na Área reservada, o botão "Esqueci-me da password" faz o mesmo.
+
+**3. Contas de clientes.**
+- Quem cria conta no site entra logo, sem email de confirmação. A conta é criada pelo servidor do site.
+- O "Esqueci-me da palavra-passe" manda o link pelo teu Gmail, em português.
+- Também podem entrar com a conta Google, depois de configurares o Google no Supabase.
+
+**4. Assistente e orçamentos.**
+- Sem a variável `ANTHROPIC_API_KEY`, o chat responde sozinho com a informação real do site: preços de reparação, stock, horário, morada e marcações. Tem botões rápidos e ligação ao WhatsApp.
+- O pedido de orçamento na página Reparações é um formulário simples. Cada pedido aparece no painel (Orçamentos) e manda um email para ti e para o cliente.
+- Se um dia quiseres o assistente com IA, cria conta em console.anthropic.com, põe a chave em `ANTHROPIC_API_KEY` no Netlify e faz Trigger deploy. O chat passa a usar IA sozinho, e cada conversa custa poucos cêntimos.
+
+**5. Stock das publicações do Instagram.**
+- O ficheiro `supabase/stock-instagram.sql` tem os produtos publicados até 30 de outubro.
+- Correr esse ficheiro **substitui** a lista de equipamentos. Depois disso, gere o stock pelo painel (Stock).
+
+---
+
 ## Passo 5: criar a tua conta de administrador
 
 1. Abre o site, carrega em **Entrar → Criar conta** e regista-te com o teu email, por exemplo `xtechstorept@gmail.com`.

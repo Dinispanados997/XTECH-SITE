@@ -201,6 +201,11 @@
     auth: {
       user: ()=> userOut(),
       async signUp(email, password, name){
+        // 1.º o servidor do site cria a conta já confirmada (sem depender dos emails do Supabase)
+        let r = null; try{ r = await fetch('/.netlify/functions/account', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'signup', email, password, name }) }); }catch(e){}
+        if(r && r.ok){ await live.auth.signIn(email, password); return { user: userOut(), needsConfirm:false }; }
+        if(r && [400, 409, 429].includes(r.status)){ const d = await r.json().catch(()=>({})); throw new Error(d.error || 'Não foi possível criar a conta.'); }
+        // plano B: registo normal do Supabase
         const { data, error } = await sb.auth.signUp({ email, password, options:{ data:{ name }, emailRedirectTo: location.origin + location.pathname } });
         if(error) throw error;
         return { user: userOut(), needsConfirm: !data.session };
@@ -211,7 +216,12 @@
         return userOut();
       },
       async signOut(){ await sb.auth.signOut(); session = null; },
-      async resetPassword(email){ const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if(error) throw error; },
+      async resetPassword(email){
+        let r = null; try{ r = await fetch('/.netlify/functions/account', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'reset', email }) }); }catch(e){}
+        if(r && r.ok) return;
+        if(r && [400, 429].includes(r.status)){ const d = await r.json().catch(()=>({})); throw new Error(d.error || 'Não foi possível enviar.'); }
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if(error) throw error;
+      },
       // entrar com a conta Google (volta ao site já com sessão iniciada)
       async signInWithGoogle(){
         const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + location.pathname, queryParams:{ prompt:'select_account' } } });
@@ -252,7 +262,7 @@
       async update(id, patch){ const { data, error } = await sb.from('returns').update(patch).eq('id', id).select().maybeSingle(); if(error) throw error; notify('return', id); return data; },
     },
     inbox: {
-      async submit(kind, payload){ const u = userOut(); const { error } = await sb.from('inbox').insert({ kind, payload, email: (payload.email || (u && u.email) || '').toLowerCase() || null, user_id: u ? u.id : null }); if(error) throw error; },
+      async submit(kind, payload){ const u = userOut(); const { error } = await sb.from('inbox').insert({ kind, payload, email: (payload.email || (u && u.email) || '').toLowerCase() || null, user_id: u ? u.id : null }); if(error) throw error; if(kind === 'quote') notify('quotes', 1); },
       async mine(){ const u = userOut(); if(!u) return []; const { data } = await sb.from('inbox').select('*').order('created_at', { ascending:false }).limit(200); return (data || []).filter(r=> r.user_id === u.id || (r.email||'').toLowerCase() === u.email); },
       async pending(){ const { data } = await sb.from('inbox').select('*').eq('imported', false).order('created_at'); return data || []; },
       async update(id, patch){ await sb.from('inbox').update(patch).eq('id', id); },
@@ -393,7 +403,12 @@
       async update(id, patch){ const list = await dlist('demo_returns'); const x = list.find(r=>r.id===id); Object.assign(x, patch, { updated_at:nowIso() }); demoMail('return', x, { order:(await dlist('demo_orders')).find(o=>o.id===x.order_id) }); await dsave('demo_returns', list); emit('returns', { eventType:'UPDATE', new:x }); return x; },
     },
     inbox: {
-      async submit(kind, payload){ const list = await dlist('demo_inbox'); list.push({ id:nextId(list), kind, payload, email:(payload.email||(demoUser&&demoUser.email)||'').toLowerCase(), user_id: demoUser ? demoUser.id : null, status:'Pendente', imported:false, created_at:nowIso() }); await dsave('demo_inbox', list); emit('inbox', {}); },
+      async submit(kind, payload){
+        if(kind === 'quote' && window.XEmails){ const base = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, ''); const out = [];
+          const sh = window.XEmails.render({ tpl:'shop_quote', to:'loja' }, payload, { siteUrl:base }); out.push({ to:'xtechstorept@gmail.com', subject:sh.subject, html:sh.html, shop:true });
+          if(payload.email){ const cl = window.XEmails.render({ tpl:'quote_cliente', to:'cliente' }, payload, { siteUrl:base }); out.push({ to:payload.email, subject:cl.subject, html:cl.html }); }
+          setTimeout(()=> window.XEmails.showDemo && window.XEmails.showDemo(out), 400); }
+        const list = await dlist('demo_inbox'); list.push({ id:nextId(list), kind, payload, email:(payload.email||(demoUser&&demoUser.email)||'').toLowerCase(), user_id: demoUser ? demoUser.id : null, status:'Pendente', imported:false, created_at:nowIso() }); await dsave('demo_inbox', list); emit('inbox', {}); },
       async mine(){ if(!demoUser) return []; return (await dlist('demo_inbox')).filter(r=> r.user_id===demoUser.id || r.email===demoUser.email).sort((a,b)=>b.id-a.id); },
       async pending(){ return (await dlist('demo_inbox')).filter(r=>!r.imported); },
       async update(id, patch){ const list = await dlist('demo_inbox'); const x = list.find(r=>r.id===id); if(x){ Object.assign(x, patch); await dsave('demo_inbox', list); } },

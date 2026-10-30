@@ -162,3 +162,17 @@ export async function authAdmin(path, { method = 'GET', body } = {}) {
 export async function addStaff(email, name, role) {
   await rest('staff?on_conflict=email', { method: 'POST', body: [{ email, name, role }], prefer: 'resolution=merge-duplicates,return=minimal' });
 }
+
+// pedidos de orçamento (tabela inbox) ainda sem email enviado — últimos 2 dias
+export async function pendingQuotes() {
+  const since = new Date(Date.now() - 2 * 864e5).toISOString();
+  return (await rest(`inbox?kind=eq.quote&payload->>_emailed=is.null&created_at=gte.${encodeURIComponent(since)}&select=*&order=id.asc&limit=20`)) || [];
+}
+// marca como avisado; só devolve a linha a quem chegar primeiro
+export async function claimQuote(row) {
+  const rows = await rest(`inbox?id=eq.${Number(row.id)}&payload->>_emailed=is.null`, { method: 'PATCH', body: { payload: { ...(row.payload || {}), _emailed: new Date().toISOString() } }, prefer: 'return=representation' });
+  return !!(rows && rows.length);
+}
+export async function unclaimQuote(row) {
+  await rest(`inbox?id=eq.${Number(row.id)}`, { method: 'PATCH', body: { payload: row.payload || {} }, prefer: 'return=minimal' });
+}

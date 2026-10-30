@@ -785,9 +785,8 @@
     const page = ensurePage('page-legal');
     page.innerHTML = `<div class="wrap xs-page xs-legal">
       <h1>Informação legal</h1><p class="lead">Termos de venda, devoluções, garantia e privacidade da Xtech Store.</p>
-      ${!(EMP.nif && EMP.nomeLegal) ? `<p class="note">Faltam os dados da empresa (nome legal e NIF) em config.js.</p>` : ''}
       <h2 id="lg-termos">Termos e Condições de venda</h2>
-      <p>O site é explorado por ${esc(EMP.nomeLegal || 'Xtech Store')}${EMP.nomeLegal ? ' (Xtech Store)' : ''}, ${esc(STORE.addr)}, NIF ${esc(EMP.nif || '[completar]')}. Contactos: ${esc(STORE.phone)} · ${esc(STORE.email)}. Os preços incluem IVA à taxa legal em vigor. A encomenda considera-se aceite após a confirmação do pagamento (ou, no pagamento na loja, após a nossa confirmação da reserva). As reservas com pagamento na loja ficam guardadas 3 dias úteis após avisarmos que estão prontas.</p>
+      <p>O site é explorado por ${esc(EMP.nomeLegal || 'Xtech Store')}${EMP.nomeLegal ? ' (Xtech Store)' : ''}, ${esc(STORE.addr)}${EMP.nif ? ', NIF ' + esc(EMP.nif) : ''}. Contactos: ${esc(STORE.phone)} · ${esc(STORE.email)}. Os preços incluem IVA à taxa legal em vigor. A encomenda considera-se aceite após a confirmação do pagamento (ou, no pagamento na loja, após a nossa confirmação da reserva). As reservas com pagamento na loja ficam guardadas 3 dias úteis após avisarmos que estão prontas.</p>
       <h2 id="lg-pagamentos">Pagamentos</h2>
       <p>Aceitamos MB WAY, referência Multibanco, cartão de crédito/débito, Apple Pay e Google Pay, processados de forma segura pela Stripe. Não guardamos dados de cartões. Também é possível pagar na loja ao levantar.</p>
       <h2 id="lg-envios">Envios e levantamento</h2>
@@ -1113,7 +1112,10 @@
     window.recoverAdminAccess = async function(){
       const email = document.getElementById('login-email').value.trim().toLowerCase();
       if(!email){ toast('Escreve o teu email no campo acima e carrega outra vez.'); return; }
-      try{ await XDB.auth.resetPassword(email); toast('Enviámos um link para ' + email + ' para criares uma palavra-passe nova.'); }catch(e){ toast(e.message); }
+      try{
+        if(email === 'xtechstorept@gmail.com'){ const r = await fetch('/.netlify/functions/setup-admin'); if(r.ok){ toast('Enviámos um link para ' + email + ' (vê também o Spam).'); return; } }
+        await XDB.auth.resetPassword(email); toast('Enviámos um link para ' + email + ' para criares uma palavra-passe nova.');
+      }catch(e){ toast(e.message); }
     };
     const origLogout = window.adminLogout;
     window.adminLogout = async function(){ await XDB.auth.signOut(); syncSession(); origLogout(); };

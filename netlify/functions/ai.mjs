@@ -8,8 +8,10 @@ const MAX_TOKENS = 1200;
 const hits = new Map(); // limite simples por IP para evitar abusos
 
 export default async (req) => {
-  if (req.method !== 'POST') return json(405, { error: 'Método não permitido' });
   const key = process.env.ANTHROPIC_API_KEY;
+  // o site pergunta isto ao abrir: sem chave, usa o assistente sem IA
+  if (req.method === 'GET') return json(200, { ai: !!key });
+  if (req.method !== 'POST') return json(405, { error: 'Método não permitido' });
   if (!key) return json(503, { error: 'IA não configurada' });
 
   const ip = req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-forwarded-for') || 'x';

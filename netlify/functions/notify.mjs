@@ -4,7 +4,7 @@
 // que email está em falta, envia-o só para o email desse registo e nunca o repete.
 import { assertEnv, json, lastBookings, URL_, KEY } from '../lib/db.mjs';
 import { mailProvider, mailLoginTest, shopEmail } from '../lib/mailer.mjs';
-import { siteUrl } from '../lib/notify-core.mjs';
+import { siteUrl, notifyQuotes } from '../lib/notify-core.mjs';
 import { notify } from '../lib/notify-core.mjs';
 
 const hits = new Map();
@@ -19,6 +19,7 @@ export default async (req) => {
   try {
     assertEnv(['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
     const body = await req.json().catch(() => ({}));
+    if (body.kind === 'quotes') { const q = await notifyQuotes(); console.log('notify quotes', JSON.stringify(q)); return json(200, q); }
     if (!['order', 'return', 'booking'].includes(body.kind)) return json(400, { error: 'Tipo inválido' });
     const r = await notify(body.kind, Number(body.id));
     console.log('notify', body.kind, body.id, JSON.stringify(r));
@@ -43,8 +44,9 @@ async function diagnostico() {
     email_por: mailProvider() || 'nenhum',
     avisos_para: shopEmail(),
     SITE_URL: siteUrl() || 'FALTA',
+    IA: v('ANTHROPIC_API_KEY') ? 'ligada' : 'desligada (o site usa o assistente sem IA)',
   };
-  try { out.supabase = 'ok'; out.ultimas_marcacoes = (await lastBookings()).map((b) => `${b.number} ${b.day} ${b.slot} ${b.status} · emails: ${(b.emails || []).map((e) => e.k).join(', ') || '—'}`); }
+  try { await lastBookings(); out.supabase = 'ok'; }
   catch (e) { out.supabase = 'ERRO: ' + e.message.slice(0, 300); }
   out.gmail_login = await mailLoginTest();
   return new Response(JSON.stringify(out, null, 2), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });

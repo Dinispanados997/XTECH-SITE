@@ -1,7 +1,7 @@
 // Decide e envia os emails automáticos de uma encomenda, devolução ou marcação.
 // As regras e os textos estão em public/emails.js (os mesmos que o site usa no modo demonstração).
 import '../../public/emails.js';
-import { getRow, rpc } from './db.mjs';
+import { getRow, rpc, pendingQuotes, claimQuote, unclaimQuote } from './db.mjs';
 import { sendMail, shopEmail, mailProvider } from './mailer.mjs';
 
 const X = globalThis.XEmails;
@@ -37,4 +37,27 @@ export async function notify(kind, id, opts = {}) {
     }
   }
   return { sent, skipped, errors };
+}
+
+// pedidos de orçamento: confirmação ao cliente (se deixou email) + aviso à loja
+export async function notifyQuotes() {
+  if (!mailProvider()) return { skipped: 'email não configurado' };
+  const sent = [], errors = [];
+  for (const row of await pendingQuotes()) {
+    if (!(await claimQuote(row))) continue;
+    const q = { ...(row.payload || {}), id: row.id, email: (row.payload && row.payload.email) || row.email || '' };
+    try {
+      const shop = X.render({ tpl: 'shop_quote', to: 'loja' }, q, { siteUrl: siteUrl() });
+      await sendMail({ to: shopEmail(), subject: shop.subject, html: shop.html, text: shop.text, replyTo: q.email || undefined });
+      if (q.email) {
+        const c = X.render({ tpl: 'quote_cliente', to: 'cliente' }, q, { siteUrl: siteUrl() });
+        await sendMail({ to: q.email, subject: c.subject, html: c.html, text: c.text });
+      }
+      sent.push(row.id);
+    } catch (e) {
+      console.error('email orçamento', row.id, e.message); errors.push(row.id + ': ' + e.message);
+      await unclaimQuote(row).catch(() => {});
+    }
+  }
+  return { sent, errors };
 }
