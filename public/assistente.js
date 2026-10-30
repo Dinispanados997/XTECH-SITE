@@ -32,7 +32,7 @@
 
   function svcLine(k){ const s = sv(k); return s ? `<b>${esc(s.l)}</b>: ${esc(s.p)} <span class="as-muted">(${esc(s.t)})</span>` : ''; }
   function priceList(){
-    return 'Estes são os nossos preços (IVA incluído). O valor final é sempre confirmado no <b>diagnóstico gratuito</b>:<br>' +
+    return 'Estes são os preços mínimos (IVA incluído). O valor exato depende do modelo e é confirmado no <b>diagnóstico gratuito</b>:<br>' +
       ['ecra','bateria','camara','conector','software','placa'].map(k=> '• ' + svcLine(k)).join('<br>');
   }
   function deviceCards(list){
@@ -69,11 +69,11 @@
     // reparações de computadores, consolas, tablets e relógios: a tabela é de telemóveis
     if(wantsRepair && has('switch','consola','playstation','ps5','ps4','xbox','portat','computador','macbook','imac','ipad','tablet','watch','relogio','pc ')) return { html:'Também reparamos esse tipo de equipamento. O preço depende do modelo e da avaria, por isso fazemos o <b>diagnóstico gratuito</b> e dizemos-te o valor antes de reparar.', chips:[['marcar','Marcar diagnóstico'], ['orcamento','Pedir orçamento'], ['whatsapp','WhatsApp']] };
     // reparações
-    if(has('ecra','display','vidro da frente','partiu o vidro','touch')) return { html: svcLine('ecra') + '.<br>O diagnóstico é gratuito e confirmamos o valor exato antes de reparar.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
+    if(has('ecra','display','vidro da frente','partiu o vidro','touch')) return { html: svcLine('ecra') + '. O valor exato depende do modelo — confirmamos no diagnóstico gratuito, antes de reparar.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
     if(has('bateria','autonomia','descarrega','dura pouco')) return { html: svcLine('bateria') + '. O valor exato depende do modelo.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
-    if(has('camara','face id','sensor','foto desfocad')) return { html: svcLine('camara') + '.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
-    if(has('carrega','conector','ficha','porta de carga','cabo nao')) return { html: svcLine('conector') + '.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
-    if(has('software','desbloque','atualiza','recuperar dados','nao arranca','apple id','icloud','reset')) return { html: svcLine('software') + '.', chips:[['marcar','Marcar reparação'], ['whatsapp','Falar no WhatsApp']] };
+    if(has('camara','face id','sensor','foto desfocad')) return { html: svcLine('camara') +'. O valor exato depende do modelo.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
+    if(has('carrega','conector','ficha','porta de carga','cabo nao')) return { html: svcLine('conector') +'. O valor exato depende do modelo.', chips:[['marcar','Marcar reparação'], ['precos','Outros preços']] };
+    if(has('software','desbloque','atualiza','recuperar dados','nao arranca','apple id','icloud','reset')) return { html: svcLine('software') +'. O valor exato depende do modelo.', chips:[['marcar','Marcar reparação'], ['whatsapp','Falar no WhatsApp']] };
     if(has('placa','agua','molhou','molhad','liquido','curto','nao liga')) return { html: svcLine('placa') + '. Traz o equipamento para fazermos o diagnóstico gratuito.', chips:[['marcar','Marcar diagnóstico'], ['whatsapp','Falar no WhatsApp']] };
     if(has('traseira','vidro de tras','vidro traseiro','microfone','coluna','vibra') || word('tampa','botao','som')) return { html:'Isso depende do modelo, por isso damos o preço no <b>diagnóstico gratuito</b>. Podes marcar já ou pedir orçamento.', chips:[['marcar','Marcar reparação'], ['orcamento','Pedir orçamento'], ['whatsapp','WhatsApp']] };
     if(has('preco','quanto custa','quanto e','orcamento','valor','tabela','reparac','reparar','arranjar','avaria')) return { html: priceList(), chips:[['marcar','Marcar reparação'], ['orcamento','Pedir orçamento']] };

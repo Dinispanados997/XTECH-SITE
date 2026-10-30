@@ -56,11 +56,11 @@
   const XAgenda = {
     SERVICES: [
       { k:'diagnostico', l:'Diagnóstico gratuito',   d:'Não sabes o que tem? Vemos contigo, sem compromisso.',          p:'Grátis',     t:'cerca de 15 min' },
-      { k:'ecra',        l:'Ecrã partido',           d:'Substituição com peças originais ou compatíveis premium.',      p:'49€',        t:'cerca de 40 min' },
+      { k:'ecra',        l:'Ecrã partido',           d:'Substituição com peças originais ou compatíveis premium.',      p:'desde 49€',  t:'cerca de 40 min' },
       { k:'bateria',     l:'Bateria',                d:'Recupera a autonomia do primeiro dia.',                         p:'desde 39€',  t:'cerca de 25 min' },
-      { k:'camara',      l:'Câmara e sensores',      d:'Câmaras, Face ID e sensores de proximidade.',                   p:'39€',        t:'cerca de 35 min' },
-      { k:'conector',    l:'Conector de carga',      d:'Quando deixa de carregar ou só carrega na posição certa.',      p:'34€',        t:'cerca de 30 min' },
-      { k:'software',    l:'Software e desbloqueio', d:'Atualizações, recuperação de dados e problemas de arranque.',   p:'19€',        t:'cerca de 20 min' },
+      { k:'camara',      l:'Câmara e sensores',      d:'Câmaras, Face ID e sensores de proximidade.',                   p:'desde 39€',  t:'cerca de 35 min' },
+      { k:'conector',    l:'Conector de carga',      d:'Quando deixa de carregar ou só carrega na posição certa.',      p:'desde 34€',  t:'cerca de 30 min' },
+      { k:'software',    l:'Software e desbloqueio', d:'Atualizações, recuperação de dados e problemas de arranque.',   p:'desde 19€',  t:'cerca de 20 min' },
       { k:'placa',       l:'Placa lógica',           d:'Danos por líquidos e curto-circuitos, ao micro.',               p:'desde 79€',  t:'1 a 3 dias' },
       { k:'outro',       l:'Outro problema',         d:'Tampa traseira, botões, som, água… avaliamos na hora.',         p:'Orçamento',  t:'após diagnóstico' },
     ],
