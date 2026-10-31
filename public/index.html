@@ -5167,5 +5167,55 @@ async function vintedPesquisar(ev, silencioso){
   box.innerHTML = html;
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.17/dist/motion.js"></script>
+<script id="xtech-motion-js">
+// animações de entrada com o Motion (versão JS, sem React). Se a biblioteca não carregar ou o
+// utilizador pedir menos movimento, o site fica exatamente como estava.
+(function(){
+  if(!window.Motion || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { animate, inView, stagger } = window.Motion;
+  const ease = [0.22, 1, 0.36, 1];
+
+  // devolve o elemento ao CSS no fim, para não estragar o hover e o efeito 3D dos cartões.
+  // o temporizador cobre as animações interrompidas (cartão redesenhado a meio), cuja promessa não termina
+  function correr(els, keyframes, opts, total){
+    const limpar = () => els.forEach(el => { el.style.opacity = ''; el.style.transform = ''; });
+    animate(els, keyframes, opts).then(limpar);
+    setTimeout(limpar, total * 1000 + 300);
+  }
+
+  // entrada do topo da página inicial
+  const heroTxt = [...document.querySelectorAll('.hero .eyebrow, .hero .hero-title, .hero .sub, .hero .hero-ctas')];
+  if(heroTxt.length){
+    heroTxt.forEach(el => { el.style.opacity = '0'; });
+    correr(heroTxt, { opacity: [0, 1], y: [24, 0] }, { duration: 0.7, delay: stagger(0.09), easing: ease }, 0.7 + 0.09 * heroTxt.length);
+  }
+  const heroVis = document.querySelector('.hero .hero-visual');
+  if(heroVis) correr([heroVis], { opacity: [0, 1] }, { duration: 0.9, delay: 0.25 }, 1.15);
+
+  // blocos que aparecem ao fazer scroll (uma vez cada)
+  const SEL = '.banners .banner, .trust-item, .xt-visit, .product-card, .diag-card, .map-card';
+  const vistos = new WeakSet();
+  function observar(root){
+    const els = root.matches && root.matches(SEL) ? [root] : [...(root.querySelectorAll ? root.querySelectorAll(SEL) : [])];
+    els.forEach(el => {
+      if(vistos.has(el)) return;
+      vistos.add(el);
+      el.style.opacity = '0';
+      inView(el, () => {
+        // cartões lado a lado entram em cascata
+        const irmaos = el.parentElement ? [...el.parentElement.children] : [el];
+        const i = Math.max(0, irmaos.indexOf(el)) % 4;
+        correr([el], { opacity: [0, 1], y: [28, 0] }, { duration: 0.6, delay: i * 0.07, easing: ease }, 0.6 + i * 0.07);
+      }, { amount: 0.15 });
+    });
+  }
+  observar(document);
+
+  // os produtos da loja e da vitrine são desenhados por JavaScript depois de a página abrir
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if(n.nodeType === 1) observar(n); })))
+    .observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
