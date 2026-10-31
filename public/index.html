@@ -1280,10 +1280,15 @@ html.vt-lock{overflow:hidden}
       <div class="wrap">
         <div class="xt-shop-head">
           <h1>Loja</h1>
-          <p>Equipamentos usados e testados, com 18 meses de garantia. Acessórios novos.</p>
+          <p>Telemóveis, computadores e acessórios. Os equipamentos usados são testados pela nossa equipa antes de irem para venda.</p>
+          <ul class="xt-shop-facts">
+            <li><b>18 meses</b> de garantia nos usados</li>
+            <li><b>Levantamento</b> na loja em Amares</li>
+            <li><b>MB WAY</b>, Multibanco ou cartão</li>
+          </ul>
         </div>
         <div class="xt-toolbar">
-          <div class="chip-row" id="catalog-chips"></div>
+          <div class="chip-row" id="catalog-chips" role="tablist" aria-label="Categorias"></div>
           <div class="xt-tools">
             <span id="catalog-count"></span>
             <label class="xt-sort"><span class="sr">Ordenar</span><select id="catalog-sort" onchange="setCatalogSort(this.value)"><option value="rel">Em destaque</option><option value="asc">Preço: mais baixo</option><option value="desc">Preço: mais alto</option></select></label>
@@ -1877,33 +1882,42 @@ function renderCatalogChips(){
   const el = document.getElementById('catalog-chips');
   if(!el) return;
   const cats = catalogCategoriesNow(); if(!cats.includes(catalogFilter)) catalogFilter = 'Todos';
-  el.innerHTML = cats.map(c=>`<div class="chip ${catalogFilter===c?'active':''}" onclick="setCatalogFilter('${c}')">${c}</div>`).join('');
+  const inStock = [...devices.filter(d=>(d.qty??1)>0).map(devCat), ...accessories.map(a=>a.cat)];
+  const count = c => c==='Todos' ? inStock.length : inStock.filter(x=>x===c).length;
+  el.innerHTML = cats.map(c=>`<button type="button" role="tab" aria-selected="${catalogFilter===c}" class="chip ${catalogFilter===c?'active':''}" onclick="setCatalogFilter('${c}')">${c}<span class="xt-n">${count(c)}</span></button>`).join('');
 }
 function setCatalogFilter(c){ catalogFilter = c; renderCatalogChips(); renderCatalog(); }
 function renderCatalog(){
   const grid = document.getElementById('products-grid');
   if(!grid) return;
-  const phoneItems = devices.filter(d=> d.qty==null || d.qty==='' || Number(d.qty)>0).map(d=>({type:'device', id:d.id, name:`${d.brand} ${d.model} ${d.storage||''}`.trim(), cat:devCat(d), price:d.price, variants:d.variants, desc:[d.cond, d.color, d.battery?('Bateria '+d.battery+'%'):''].filter(Boolean).join(' · '), photo:(d.photos&&d.photos[0])||d.photo||''}));
+  const phoneItems = devices.filter(d=> d.qty==null || d.qty==='' || Number(d.qty)>0).map(d=>({type:'device', id:d.id, name:`${d.brand} ${d.model} ${d.storage||''}`.trim(), cat:devCat(d), price:d.price, variants:d.variants, specs:[d.cond, d.battery?('Bateria '+d.battery+'%'):'', d.color].filter(Boolean), photo:(d.photos&&d.photos[0])||d.photo||''}));
   const accItems = accessories.map(a=>({type:'accessory', id:a.id, name:a.name, cat:a.cat, price:a.price, variants:a.variants, desc:a.desc, photo:(a.photos&&a.photos[0])||a.photo||''}));
   const all = [...phoneItems, ...accItems];
   let list = catalogFilter==='Todos' ? all : all.filter(i=>i.cat===catalogFilter);
   if(catalogSort==='asc') list = [...list].sort((a,b)=>a.price-b.price);
   if(catalogSort==='desc') list = [...list].sort((a,b)=>b.price-a.price);
   const cnt = document.getElementById('catalog-count'); if(cnt) cnt.textContent = list.length + (list.length===1 ? ' artigo' : ' artigos');
-  grid.innerHTML = list.length ? list.map(item=>`
-    <div class="product-card" ${item.type?`onclick="openProductDetail('${item.type}',${item.id})" style="cursor:pointer;"`:''}>
+  const card = item => `
+    <div class="product-card${item.type==='accessory'?' is-acc':''}" onclick="openProductDetail('${item.type}',${item.id})" style="cursor:pointer;">
       <div class="product-img">${item.photo ? `<img src="${item.photo}" alt="${item.name}" loading="lazy" style="width:100%; height:100%; object-fit:contain; padding:9%; box-sizing:border-box;">` : (item.type==='device' ? productSvg() : accessorySvg(item.cat))}</div>
       <div class="product-body">
         <div class="brand">${item.cat}</div>
         <h4>${item.name}</h4>
-        <div class="cond">${item.desc||''}</div>
+        <div class="cond">${item.specs ? item.specs.map(s=>`<span>${s}</span>`).join('') : (item.desc||'')}</div>
+        ${item.type==='device' ? `<div class="xt-warranty">Garantia de 18 meses</div>` : ''}
         <div class="product-actions">
           <div class="price">${item.variants && Object.values(item.variants).some(v=>v&&v.length) ? 'desde ' : ''}<b>${euro(item.price)}</b></div>
           <button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); Shop.quickAdd('${item.type}',${item.id})">Adicionar</button>
         </div>
       </div>
-    </div>
-  `).join('') : `<div class="empty-inline">Sem produtos nesta categoria.</div>`;
+    </div>`;
+  // em "Todos", equipamentos e acessórios aparecem em blocos separados, como nas prateleiras da loja
+  const group = (title, note, items) => `<div class="xt-group"><h2>${title}</h2><span>${items.length} · ${note}</span></div>` + items.map(card).join('');
+  const devs = list.filter(i=>i.type==='device'), accs = list.filter(i=>i.type!=='device');
+  grid.innerHTML = !list.length ? `<div class="empty-inline">Sem produtos nesta categoria.</div>`
+    : (catalogFilter==='Todos' && devs.length && accs.length)
+      ? group('Equipamentos', 'usados e recondicionados, testados um a um', devs) + group('Acessórios', 'novos', accs)
+      : list.map(card).join('');
 }
 function findCatalogItem(type, id){
   if(type==='device') return devices.find(d=>d.id===id);
@@ -4891,6 +4905,89 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 @media (prefers-reduced-motion: reduce){ .product-card:hover .product-img img{transform:none !important;} }
 </style>
 
+<style id="xt-loja">
+/* ============ Loja — visual de loja a sério: menos efeitos, mais informação ============ */
+/* cabeçalho */
+#page-loja .xt-shop-head{max-width:none; margin:0 0 34px;}
+#page-loja .xt-shop-head h1{font:700 clamp(36px,4.6vw,52px)/1.05 var(--font); letter-spacing:-.03em; margin:0 0 12px;}
+#page-loja .xt-shop-head p{font-size:16px; line-height:1.55; max-width:62ch;}
+.xt-shop-facts{list-style:none; display:flex; flex-wrap:wrap; margin:22px 0 0; padding:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+.xt-shop-facts li{padding:13px 22px 13px 0; margin-right:22px; color:var(--muted); font-size:14px; border-right:1px solid var(--line);}
+.xt-shop-facts li:last-child{border-right:0; margin-right:0;}
+.xt-shop-facts b{color:var(--text); font-weight:600;}
+
+/* filtros: separadores de texto em vez de pílulas */
+#page-loja .xt-toolbar{flex-direction:column; align-items:stretch; gap:14px; margin:0 0 24px;}
+#page-loja .xt-toolbar .chip-row{gap:26px; border-bottom:1px solid var(--line); padding:0 !important;}
+#page-loja .chip{background:none; border:0; border-radius:0; color:var(--muted); font:500 15px var(--font); padding:10px 0 12px; margin-bottom:-1px; border-bottom:2px solid transparent; cursor:pointer; transition:color .15s, border-color .15s;}
+#page-loja .chip:hover{background:none; color:var(--text);}
+#page-loja .chip.active{background:none; color:var(--text); border-bottom-color:var(--text);}
+#page-loja .chip:focus-visible{outline:2px solid var(--text); outline-offset:2px;}
+#page-loja .chip .xt-n{margin-left:6px; font-size:12px; color:var(--muted-2); font-variant-numeric:tabular-nums;}
+#page-loja .xt-tools{justify-content:space-between; font-size:13.5px;}
+#page-loja .xt-sort select{background-color:transparent; border:1px solid var(--line); border-radius:8px; padding:8px 34px 8px 12px; font:500 13.5px var(--font); background-position:right 12px center;}
+#page-loja .xt-sort select:hover{border-color:rgba(255,255,255,.25);}
+
+/* blocos Equipamentos / Acessórios */
+.xt-group{grid-column:1/-1; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding-top:10px;}
+.xt-group ~ .xt-group{margin-top:28px; padding-top:30px; border-top:1px solid var(--line);}
+.xt-group h2{font:650 21px/1.2 var(--font); letter-spacing:-.015em; margin:0;}
+.xt-group span{color:var(--muted); font-size:14px;}
+
+/* cartões: planos, cantos discretos, sem inclinação nem brilho */
+#page-loja .products-grid{perspective:none; gap:16px !important;}
+#page-loja .product-card{border-radius:12px !important; background:var(--surface); box-shadow:none; border:1px solid var(--line); transform:none; transition:border-color .15s; display:flex; flex-direction:column;}
+#page-loja .product-card:hover{border:1px solid rgba(255,255,255,.24);}
+#page-loja .product-card::after{display:none;}
+#page-loja .product-img{aspect-ratio:4/3 !important; background:#1a1a1b !important; border-bottom:1px solid var(--line);}
+#page-loja .product-card:hover .product-img img{transform:none !important;}
+#page-loja .product-img svg{width:22%; opacity:.45;}
+#page-loja .product-body{padding:16px 16px 16px; display:flex; flex-direction:column; flex:1;}
+#page-loja .product-body .brand{font-size:12.5px; font-weight:500; color:var(--muted); margin:0 0 4px;}
+#page-loja .product-body h4{font:600 17px/1.25 var(--font) !important; letter-spacing:-.01em !important; margin:0 0 10px;}
+#page-loja .product-body .cond{display:flex; flex-wrap:wrap; gap:6px; min-height:0; margin:0 0 10px; color:var(--muted); font-size:13px; line-height:1.45;}
+#page-loja .product-body .cond span{border:1px solid var(--line); border-radius:5px; padding:2px 7px; font-size:12px; color:#C7C7CC; white-space:nowrap;}
+#page-loja .xp-card-cols:has(> i:only-child){display:none;} /* uma só cor já aparece escrita nas etiquetas */
+.xt-warranty{font-size:12.5px; color:var(--muted); margin:0 0 4px; padding-left:14px; position:relative;}
+.xt-warranty::before{content:""; position:absolute; left:0; top:.45em; width:6px; height:6px; border-radius:50%; background:var(--green);}
+#page-loja .product-actions{margin-top:auto; padding-top:12px;}
+#page-loja .product-body .price{font-size:12.5px; color:var(--muted);}
+#page-loja .product-body .price b{font-size:20px; font-weight:700; letter-spacing:-.01em; margin-left:2px; color:var(--text); font-variant-numeric:tabular-nums;}
+#page-loja .product-actions .btn{background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:8px 14px; min-height:36px; font-weight:600; font-size:13.5px; transition:background .15s, border-color .15s;}
+#page-loja .product-actions .btn:hover{background:var(--paper); color:#000; border-color:var(--paper);}
+
+/* acessórios: cartão em linha, imagem pequena (a maioria não tem foto) */
+#page-loja .product-card.is-acc{flex-direction:row; align-items:stretch;}
+#page-loja .is-acc .product-img{aspect-ratio:auto !important; width:96px; flex:0 0 96px; border-bottom:0; border-right:1px solid var(--line);}
+#page-loja .is-acc .product-img svg{width:40%;}
+#page-loja .is-acc .product-body{padding:12px 14px; min-width:0;}
+#page-loja .is-acc .product-body h4{font-size:15px !important; margin-bottom:2px;}
+#page-loja .is-acc .product-body .cond{font-size:12.5px; margin-bottom:6px;}
+#page-loja .is-acc .product-actions{padding-top:4px;}
+#page-loja .is-acc .product-body .price b{font-size:16px;}
+#page-loja .is-acc .product-actions .btn{padding:6px 11px; min-height:32px; font-size:13px;}
+
+@media (max-width:640px){
+  .xt-shop-facts{flex-direction:column;}
+  .xt-shop-facts li{border-right:0; margin:0; padding:10px 0; border-bottom:1px solid var(--line);}
+  .xt-shop-facts li:last-child{border-bottom:0;}
+  #page-loja .xt-toolbar .chip-row{margin:0 -20px !important; padding:0 20px !important; gap:22px;}
+  #page-loja .product-card{border-radius:10px !important;}
+  #page-loja .product-body{padding:12px !important;}
+  #page-loja .product-body h4{font-size:15px !important;}
+  #page-loja .product-body .cond span{font-size:11px; padding:1px 6px;}
+  #page-loja .product-body .price b{font-size:17px !important;}
+  #page-loja .product-actions .btn{min-height:40px;}
+  #page-loja .product-card.is-acc{grid-column:1/-1;}
+  #page-loja .is-acc .product-img{width:80px; flex-basis:80px;}
+  #page-loja .is-acc .product-body{padding:10px 12px !important;}
+  #page-loja .is-acc .product-body .cond{margin-bottom:2px;}
+  #page-loja .is-acc .product-actions{flex-direction:row !important; align-items:center !important;}
+  #page-loja .is-acc .product-actions .btn{min-height:36px; padding:6px 12px !important;}
+  .xt-warranty{font-size:11.5px;}
+}
+</style>
+
 <style id="xt-admin-tools">
 .admin-bottom-inner{overflow-x:auto; scrollbar-width:none; gap:2px;}
 .admin-bottom-inner::-webkit-scrollbar{display:none;}
@@ -5166,6 +5263,56 @@ async function vintedPesquisar(ev, silencioso){
   html += `<p class="xp-note">Resultados em direto da Vinted (${vintedOrdemAtual==='recentes' ? 'os acabados de publicar primeiro' : 'do mais barato para o mais caro'}). O preço normal é a mediana dos anúncios recentes do mesmo modelo e capacidade sem defeitos no título. Lê sempre a descrição e paga só pela Vinted.</p>`;
   box.innerHTML = html;
 }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.17/dist/motion.js"></script>
+<script id="xtech-motion-js">
+// animações de entrada com o Motion (versão JS, sem React). Se a biblioteca não carregar ou o
+// utilizador pedir menos movimento, o site fica exatamente como estava.
+(function(){
+  if(!window.Motion || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { animate, inView, stagger } = window.Motion;
+  const ease = [0.22, 1, 0.36, 1];
+
+  // devolve o elemento ao CSS no fim, para não estragar o hover e o efeito 3D dos cartões.
+  // o temporizador cobre as animações interrompidas (cartão redesenhado a meio), cuja promessa não termina
+  function correr(els, keyframes, opts, total){
+    const limpar = () => els.forEach(el => { el.style.opacity = ''; el.style.transform = ''; });
+    animate(els, keyframes, opts).then(limpar);
+    setTimeout(limpar, total * 1000 + 300);
+  }
+
+  // entrada do topo da página inicial
+  const heroTxt = [...document.querySelectorAll('.hero .eyebrow, .hero .hero-title, .hero .sub, .hero .hero-ctas')];
+  if(heroTxt.length){
+    heroTxt.forEach(el => { el.style.opacity = '0'; });
+    correr(heroTxt, { opacity: [0, 1], y: [24, 0] }, { duration: 0.7, delay: stagger(0.09), easing: ease }, 0.7 + 0.09 * heroTxt.length);
+  }
+  const heroVis = document.querySelector('.hero .hero-visual');
+  if(heroVis) correr([heroVis], { opacity: [0, 1] }, { duration: 0.9, delay: 0.25 }, 1.15);
+
+  // blocos que aparecem ao fazer scroll (uma vez cada)
+  const SEL = '.banners .banner, .trust-item, .xt-visit, .product-card, .diag-card, .map-card';
+  const vistos = new WeakSet();
+  function observar(root){
+    const els = root.matches && root.matches(SEL) ? [root] : [...(root.querySelectorAll ? root.querySelectorAll(SEL) : [])];
+    els.forEach(el => {
+      if(vistos.has(el)) return;
+      vistos.add(el);
+      el.style.opacity = '0';
+      inView(el, () => {
+        // cartões lado a lado entram em cascata
+        const irmaos = el.parentElement ? [...el.parentElement.children] : [el];
+        const i = Math.max(0, irmaos.indexOf(el)) % 4;
+        correr([el], { opacity: [0, 1], y: [28, 0] }, { duration: 0.6, delay: i * 0.07, easing: ease }, 0.6 + i * 0.07);
+      }, { amount: 0.15 });
+    });
+  }
+  observar(document);
+
+  // os produtos da loja e da vitrine são desenhados por JavaScript depois de a página abrir
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if(n.nodeType === 1) observar(n); })))
+    .observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
 </html>
