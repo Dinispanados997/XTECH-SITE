@@ -1,32 +1,13 @@
+# O site mudou-se para o Vercel (https://xtechsite.vercel.app) — ver vercel.json.
+# Este ficheiro só existe para que o antigo endereço do Netlify (xtechstore.netlify.app)
+# reencaminhe tudo para o site novo, mesmo que o Netlify volte a publicar a partir do GitHub.
 [build]
   publish = "public"
-  functions = "netlify/functions"
-  # põe o endereço real do site (URL do Netlify ou o teu domínio) nas tags de partilha, robots e sitemap
-  command = "sed -i \"s#__SITE_URL__#${SITE_URL:-$URL}#g\" public/index.html public/robots.txt public/sitemap.xml"
-
-[functions]
-  node_bundler = "esbuild"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
-
-[[headers]]
-  for = "/img/*"
-  [headers.values]
-    Cache-Control = "public, max-age=604800"
-
-# endereços curtos para as páginas legais (pedidos pelo Google para o login com Google)
-[[redirects]]
-  from = "/privacidade"
-  to = "/#privacidade"
-  status = 301
+  command = ""
+  functions = "netlify/sem-funcoes"   # de propósito: no Netlify não corre nenhuma função
 
 [[redirects]]
-  from = "/termos"
-  to = "/#termos"
+  from = "/*"
+  to = "https://xtechsite.vercel.app/:splat"
   status = 301
+  force = true

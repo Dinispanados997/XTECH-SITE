@@ -1,13 +1,12 @@
 /* =====================================================================
    XTECH STORE — CAMADA DE DADOS
-   - Modo "live": base de dados Supabase partilhada (clientes + admin veem o mesmo)
+   - Modo "live": base de dados Neon partilhada (clientes + admin veem o mesmo), via /api/data
    - Modo "demo": sem configuração, tudo fica neste browser (para testar)
    Tem de carregar ANTES do script principal do site.
    ===================================================================== */
 (function(){
   const CFG = window.XTECH_CONFIG || {};
-  const LIVE = !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
-  const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  const LIVE = !!CFG.live;
 
   /* ---------------- preços (igual ao servidor: netlify/lib/pricing.mjs) ---------------- */
   const XPricing = {
@@ -52,7 +51,7 @@
   };
   window.XPricing = XPricing;
 
-  /* ---------------- marcações (regras iguais às do servidor: supabase/schema.sql → book_service) ---------------- */
+  /* ---------------- marcações (regras iguais às do servidor: neon/schema.sql → book_service) ---------------- */
   const XAgenda = {
     SERVICES: [
       { k:'diagnostico', l:'Diagnóstico gratuito',   d:'Não sabes o que tem? Vemos contigo, sem compromisso.',          p:'Grátis',     t:'cerca de 15 min' },
@@ -123,35 +122,63 @@
   const nowIso = ()=> new Date().toISOString();
 
   /* =====================================================================
-     MODO LIVE (Supabase)
+     MODO LIVE (base de dados Neon, através das funções /api/data e /api/auth)
      ===================================================================== */
-  let sb = null, kvCache = {}, session = null, staffFlag = null;
+  let kvCache = {}, session = null, staffFlag = null;
   const PUBLIC_ARRAYS = ['devices','accessories','parts','repairs','ordersClients','ordersSuppliers','custRequests','custOrders','expenses','quoteRequests','tasks'];
+  // o link do email "escolher palavra-passe" traz o email (o site apaga o endereço logo a seguir)
+  const QS0 = new URLSearchParams(location.search);
+  let pendingReset = null;
 
-  function loadScript(src){
-    return new Promise((res, rej)=>{ const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = ()=> rej(new Error('Não foi possível carregar ' + src)); document.head.appendChild(s); });
+  async function api(op, args){
+    const r = await fetch('/api/data', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ op, ...(args||{}) }) });
+    const d = await r.json().catch(()=> ({ error:'Resposta inválida do servidor.' }));
+    if(!r.ok) throw new Error(d.error || ('Erro ' + r.status));
+    return d.data;
+  }
+  const AUTH_MSG = {
+    INVALID_EMAIL_OR_PASSWORD: 'Email ou palavra-passe incorretos.',
+    INVALID_PASSWORD: 'Email ou palavra-passe incorretos.',
+    USER_ALREADY_EXISTS: 'Já existe uma conta com este email. Entra com a tua palavra-passe (ou usa "Esqueci-me da palavra-passe").',
+    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'Já existe uma conta com este email. Entra com a tua palavra-passe (ou usa "Esqueci-me da palavra-passe").',
+    PASSWORD_TOO_SHORT: 'A palavra-passe tem de ter pelo menos 8 caracteres.',
+    PASSWORD_TOO_LONG: 'A palavra-passe é demasiado comprida.',
+    INVALID_EMAIL: 'Indica um email válido.',
+    INVALID_TOKEN: 'Este link já expirou ou já foi usado. Pede um novo.',
+    PROVIDER_NOT_FOUND: 'O login com Google ainda não está ativo. Usa o email por agora.',
+  };
+  async function authCall(path, body){
+    const r = await fetch('/api/auth/' + path, body === undefined
+      ? { credentials:'same-origin' }
+      : { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json().catch(()=> null);
+    if(!r.ok){
+      const code = d && d.code;
+      if(r.status === 429) throw new Error('Demasiadas tentativas. Espera um pouco e tenta de novo.');
+      throw new Error(AUTH_MSG[code] || (d && d.message) || (d && d.error) || 'Não foi possível concluir. Tenta outra vez.');
+    }
+    return d;
+  }
+  async function loadSession(){
+    try{ const d = await authCall('get-session'); session = d && d.user ? d : null; }catch(e){ session = null; }
+    staffFlag = null;
   }
 
   async function liveInit(){
-    if(!window.supabase) await loadScript(SUPABASE_JS);
-    sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
-    const { data } = await sb.auth.getSession();
-    session = data.session;
-    sb.auth.onAuthStateChange((event, s)=>{ session = s; staffFlag = null; emit('auth', {event, user: userOut()}); });
-    await liveLoadKv();
+    await Promise.all([loadSession(), liveLoadKv()]);
   }
   async function liveLoadKv(){
-    const { data, error } = await sb.from('kv').select('key,value');
-    if(error){ console.warn('kv', error); return; }
-    kvCache = {}; (data||[]).forEach(r=> kvCache[r.key] = r.value);
+    try{ const rows = await api('kvAll'); kvCache = {}; (rows||[]).forEach(r=> kvCache[r.key] = r.value); }
+    catch(e){ console.warn('kv', e); }
   }
   function userOut(){
     const u = session && session.user; if(!u) return null;
-    const m = u.user_metadata || {};
-    return { id:u.id, email:(u.email||'').toLowerCase(), name: m.name || (u.email||'').split('@')[0], meta:m };
+    const m = u.meta || {};
+    return { id:u.id, email:(u.email||'').toLowerCase(), name: m.name || u.name || (u.email||'').split('@')[0], meta:m };
   }
+  async function signedIn(){ await loadSession(); emit('auth', { event:'SIGNED_IN', user:userOut() }); return userOut(); }
 
-  // fotografias novas (data:image…) vão para o Storage e no JSON fica só o link
+  // fotografias novas (data:image…) vão para o Vercel Blob e no JSON fica só o link
   async function shrink(dataUrl){
     try{
       const img = new Image(); img.src = dataUrl; await img.decode();
@@ -172,15 +199,40 @@
     if(uploaded.has(dataUrl)) return uploaded.get(dataUrl);
     const h = await sha1(dataUrl); const blob = await shrink(dataUrl);
     const ext = blob.type === 'image/png' ? 'png' : 'jpg';
-    const path = `p/${h}.${ext}`;
-    const { error } = await sb.storage.from('fotos').upload(path, blob, { contentType: blob.type, upsert: true, cacheControl:'31536000' });
-    if(error){ console.warn('upload', error); return dataUrl; }
-    const url = sb.storage.from('fotos').getPublicUrl(path).data.publicUrl;
-    uploaded.set(dataUrl, url); return url;
+    try{
+      const r = await fetch('/api/data?op=upload&name=' + h + '.' + ext, { method:'POST', credentials:'same-origin', headers:{ 'Content-Type': blob.type }, body: blob });
+      const d = await r.json().catch(()=> ({}));
+      if(!r.ok || !d.url){ console.warn('upload', d.error || r.status); return dataUrl; }
+      uploaded.set(dataUrl, d.url); return d.url;
+    }catch(e){ console.warn('upload', e); return dataUrl; }
   }
 
   // emails automáticos: o servidor decide que email falta e envia-o (ver netlify/functions/notify.mjs)
   function notify(kind, id){ if(!id) return; fetch('/.netlify/functions/notify', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ kind, id }), keepalive:true }).catch(()=>{}); }
+
+  // "tempo real": de 15 em 15 segundos (com a página visível) pergunta ao servidor o que mudou
+  let pollSince = null, pollTimer = null, polling = false;
+  async function poll(){
+    if(polling || document.hidden) return; polling = true;
+    try{
+      const d = await api('changes', { since: pollSince });
+      const first = !pollSince; pollSince = d.now;
+      if(first) return;
+      (d.kv||[]).forEach(r=>{ kvCache[r.key] = r.value; emit('kv', { eventType:'UPDATE', new:{ key:r.key, value:r.value } }); });
+      const t = d.tables || {};
+      ['orders','returns','inbox'].forEach(tb=>{ if(t[tb]) emit(tb, { eventType:'SYNC' }); });
+      const bk = t.bookings || [];
+      const ins = bk.filter(b=> b.history && b.history.length <= 1 && b.status === 'pendente' && b.source !== 'loja' && b.created_at === b.updated_at);
+      if(ins.length) ins.forEach(b=> emit('bookings', { eventType:'INSERT', new:b }));
+      else if(bk.length) emit('bookings', { eventType:'SYNC' });
+    }catch(e){ console.warn('sync', e.message); }
+    finally{ polling = false; }
+  }
+  function startPolling(){
+    if(pollTimer) return;
+    poll(); pollTimer = setInterval(poll, 15000);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) poll(); });
+  }
 
   const live = {
     async kvGet(key){
@@ -194,94 +246,100 @@
       if(key === 'customerSession') return;
       if(key === 'devices' || key === 'accessories') await uploadPhotos(value);
       kvCache[key] = value;
-      const { error } = await sb.from('kv').upsert({ key, value }, { onConflict:'key' });
-      if(error){ console.warn('kvSet', key, error); if(typeof toast === 'function') toast('Não foi possível guardar (' + key + '). Verifica a ligação.'); throw error; }
+      try{ await api('kvSet', { key, value }); }
+      catch(error){ console.warn('kvSet', key, error); if(typeof toast === 'function') toast('Não foi possível guardar (' + key + '). Verifica a ligação.'); throw error; }
     },
     async kvReload(keys){ await liveLoadKv(); return keys ? keys.map(k=>kvCache[k]) : kvCache; },
     auth: {
       user: ()=> userOut(),
       async signUp(email, password, name){
-        // 1.º o servidor do site cria a conta já confirmada (sem depender dos emails do Supabase)
-        let r = null; try{ r = await fetch('/.netlify/functions/account', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'signup', email, password, name }) }); }catch(e){}
-        if(r && r.ok){ await live.auth.signIn(email, password); return { user: userOut(), needsConfirm:false }; }
-        if(r && [400, 409, 429].includes(r.status)){ const d = await r.json().catch(()=>({})); throw new Error(d.error || 'Não foi possível criar a conta.'); }
-        // plano B: registo normal do Supabase
-        const { data, error } = await sb.auth.signUp({ email, password, options:{ data:{ name }, emailRedirectTo: location.origin + location.pathname } });
-        if(error) throw error;
-        return { user: userOut(), needsConfirm: !data.session };
+        await authCall('sign-up/email', { email: String(email).trim().toLowerCase(), password, name: String(name||'').trim() || String(email).split('@')[0] });
+        await signedIn();
+        return { user: userOut(), needsConfirm:false };
       },
       async signIn(email, password){
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if(error) throw new Error(/invalid/i.test(error.message) ? 'Email ou palavra-passe incorretos.' : /confirm/i.test(error.message) ? 'Confirma primeiro o teu email (vê a caixa de entrada).' : error.message);
-        return userOut();
+        await authCall('sign-in/email', { email: String(email).trim().toLowerCase(), password });
+        return signedIn();
       },
-      async signOut(){ await sb.auth.signOut(); session = null; },
+      async signOut(){ try{ await authCall('sign-out', {}); }catch(e){} session = null; staffFlag = null; emit('auth', { event:'SIGNED_OUT', user:null }); },
       async resetPassword(email){
-        let r = null; try{ r = await fetch('/.netlify/functions/account', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'reset', email }) }); }catch(e){}
-        if(r && r.ok) return;
-        if(r && [400, 429].includes(r.status)){ const d = await r.json().catch(()=>({})); throw new Error(d.error || 'Não foi possível enviar.'); }
-        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if(error) throw error;
+        await authCall('request-password-reset', { email: String(email).trim().toLowerCase(), redirectTo: location.origin + '/' });
       },
       // entrar com a conta Google (volta ao site já com sessão iniciada)
       async signInWithGoogle(){
-        const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + location.pathname, queryParams:{ prompt:'select_account' } } });
-        if(error) throw new Error(/not enabled|provider/i.test(error.message) ? 'O login com Google ainda não está ativo. Usa o email por agora.' : error.message);
+        const back = location.origin + location.pathname;
+        const d = await authCall('sign-in/social', { provider:'google', callbackURL: back, errorCallbackURL: back + '?google=erro' });
+        if(d && d.url) location.href = d.url; else throw new Error(AUTH_MSG.PROVIDER_NOT_FOUND);
       },
-      async verifyRecovery(token_hash){ const { error } = await sb.auth.verifyOtp({ token_hash, type:'recovery' }); if(error) throw new Error(/expired|invalid/i.test(error.message) ? 'Este link já expirou ou já foi usado. Pede um novo.' : error.message); session = (await sb.auth.getSession()).data.session; return userOut(); },
-      async setPassword(password){ const { error } = await sb.auth.updateUser({ password }); if(error) throw error; },
-      async updateMeta(meta){ const { data, error } = await sb.auth.updateUser({ data: meta }); if(error) throw error; session = (await sb.auth.getSession()).data.session; return userOut(); },
-      token: ()=> session && session.access_token,
+      // link do email: guarda o código; a palavra-passe nova é gravada em setPassword
+      async verifyRecovery(token){ pendingReset = { token, email: (QS0.get('e') || '').toLowerCase() }; return userOut(); },
+      async setPassword(password){
+        if(pendingReset){
+          const r = pendingReset;
+          await authCall('reset-password', { newPassword: password, token: r.token });
+          pendingReset = null;
+          if(r.email){ try{ await live.auth.signIn(r.email, password); }catch(e){} }
+          return;
+        }
+        await api('setPassword', { password });
+      },
+      async updateMeta(meta){
+        const u = await api('updateMeta', { meta });
+        if(session && session.user){ session.user.meta = u.meta; session.user.name = u.name; }
+        return userOut();
+      },
+      token: ()=> null,   // a sessão vai no cookie (mesmo site), não é preciso enviar nada
     },
     async isStaff(){
       if(!session) return false;
       if(staffFlag !== null) return staffFlag;
-      const { data } = await sb.rpc('is_staff'); staffFlag = !!data; return staffFlag;
+      try{ staffFlag = !!(await api('isStaff')); }catch(e){ staffFlag = false; }
+      return staffFlag;
     },
     staff: {
-      async add(email, name, role){ const { error } = await sb.from('staff').upsert({ email: email.toLowerCase(), name, role }); if(error) throw error; },
-      async remove(email){ await sb.from('staff').delete().eq('email', email.toLowerCase()); },
+      async add(email, name, role){ await api('staffAdd', { email, name, role }); },
+      async remove(email){ await api('staffRemove', { email }); },
     },
     orders: {
       async create(payload){
-        const res = await fetch('/.netlify/functions/create-order', { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + (session && session.access_token) }, body: JSON.stringify(payload) });
+        const res = await fetch('/.netlify/functions/create-order', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
         const data = await res.json().catch(()=>({ error:'Resposta inválida do servidor.' }));
         if(!res.ok) throw new Error(data.error || 'Erro ao criar a encomenda.');
         return data;
       },
       async retry(id){ return live.orders.create({ retryOrderId: id }); },
-      async mine(){ const u = userOut(); if(!u) return []; const { data } = await sb.from('orders').select('*').eq('user_id', u.id).order('created_at', { ascending:false }); return data || []; },
-      async get(id){ const { data } = await sb.from('orders').select('*').eq('id', id).maybeSingle(); return data; },
-      async all(){ const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending:false }).limit(1000); if(error) console.warn(error); return data || []; },
-      async update(id, patch){ const { data, error } = await sb.from('orders').update(patch).eq('id', id).select().maybeSingle(); if(error) throw error; notify('order', id); return data; },
-      async cancelMine(id){ const { data, error } = await sb.rpc('cancel_my_order', { p_id: id }); if(error) throw new Error(error.message); notify('order', id); return data; },
+      async mine(){ if(!userOut()) return []; return (await api('ordersMine').catch(()=>null)) || []; },
+      async get(id){ return api('ordersGet', { id }).catch(()=> null); },
+      async all(){ try{ return (await api('ordersAll')) || []; }catch(e){ console.warn(e); return []; } },
+      async update(id, patch){ const data = await api('ordersUpdate', { id, patch }); notify('order', id); return data; },
+      async cancelMine(id){ const data = await api('ordersCancelMine', { id }); notify('order', id); return data; },
     },
     returns: {
-      async create(r){ const u = userOut(); const { data, error } = await sb.from('returns').insert({ ...r, user_id: u.id, email: u.email }).select().maybeSingle(); if(error) throw error; if(data) notify('return', data.id); return data; },
-      async mine(){ const u = userOut(); if(!u) return []; const { data } = await sb.from('returns').select('*').eq('user_id', u.id).order('created_at', { ascending:false }); return data || []; },
-      async all(){ const { data } = await sb.from('returns').select('*').order('created_at', { ascending:false }).limit(500); return data || []; },
-      async update(id, patch){ const { data, error } = await sb.from('returns').update(patch).eq('id', id).select().maybeSingle(); if(error) throw error; notify('return', id); return data; },
+      async create(r){ const data = await api('returnsCreate', { row: r }); if(data) notify('return', data.id); return data; },
+      async mine(){ if(!userOut()) return []; return (await api('returnsMine').catch(()=>null)) || []; },
+      async all(){ return (await api('returnsAll').catch(()=>null)) || []; },
+      async update(id, patch){ const data = await api('returnsUpdate', { id, patch }); notify('return', id); return data; },
     },
     inbox: {
-      async submit(kind, payload){ const u = userOut(); const { error } = await sb.from('inbox').insert({ kind, payload, email: (payload.email || (u && u.email) || '').toLowerCase() || null, user_id: u ? u.id : null }); if(error) throw error; if(kind === 'quote') notify('quotes', 1); },
-      async mine(){ const u = userOut(); if(!u) return []; const { data } = await sb.from('inbox').select('*').order('created_at', { ascending:false }).limit(200); return (data || []).filter(r=> r.user_id === u.id || (r.email||'').toLowerCase() === u.email); },
-      async pending(){ const { data } = await sb.from('inbox').select('*').eq('imported', false).order('created_at'); return data || []; },
-      async update(id, patch){ await sb.from('inbox').update(patch).eq('id', id); },
+      async submit(kind, payload){ await api('inboxSubmit', { kind, payload }); if(kind === 'quote') notify('quotes', 1); },
+      async mine(){ if(!userOut()) return []; return (await api('inboxMine').catch(()=>null)) || []; },
+      async pending(){ return (await api('inboxPending').catch(()=>null)) || []; },
+      async update(id, patch){ await api('inboxUpdate', { id, patch }); },
     },
     bookings: {
       // só devolve dia/hora/quantidade — nunca dados de outros clientes
-      async busy(from, to){ const { data, error } = await sb.rpc('booking_busy', { p_from: from, p_to: to }); if(error){ console.warn(error); return {}; } const m = {}; (data||[]).forEach(r=> m[r.day + ' ' + r.slot] = r.n); return m; },
-      async create(b){ const { data, error } = await sb.rpc('book_service', { p: b }); if(error) throw new Error(error.message || 'Não foi possível marcar. Tenta de novo.'); if(data) notify('booking', data.id); return data; },
-      async mine(){ const u = userOut(); if(!u) return []; const { data } = await sb.from('bookings').select('*').eq('user_id', u.id).order('day', { ascending:false }).order('slot', { ascending:false }); return data || []; },
-      async cancelMine(id){ const { data, error } = await sb.rpc('cancel_my_booking', { p_id: id }); if(error) throw new Error(error.message); notify('booking', id); return data; },
-      async all(){ const since = XAgenda.addDays(XAgenda.now().date, -90); const { data, error } = await sb.from('bookings').select('*').gte('day', since).order('day').order('slot').limit(3000); if(error) console.warn(error); return data || []; },
-      async add(b){ const { data, error } = await sb.from('bookings').insert(b).select().maybeSingle(); if(error) throw error; if(data) notify('booking', data.id); return data; },
-      async update(id, patch){ const { data, error } = await sb.from('bookings').update(patch).eq('id', id).select().maybeSingle(); if(error) throw error; notify('booking', id); return data; },
-      async remove(id){ const { error } = await sb.from('bookings').delete().eq('id', id); if(error) throw error; },
+      async busy(from, to){ try{ const rows = await api('bookingsBusy', { from, to }); const m = {}; (rows||[]).forEach(r=> m[r.day + ' ' + r.slot] = r.n); return m; }catch(e){ console.warn(e); return {}; } },
+      async create(b){ const data = await api('bookingsCreate', { b }); if(data) notify('booking', data.id); return data; },
+      async mine(){ if(!userOut()) return []; return (await api('bookingsMine').catch(()=>null)) || []; },
+      async cancelMine(id){ const data = await api('bookingsCancelMine', { id }); notify('booking', id); return data; },
+      async all(){ const since = XAgenda.addDays(XAgenda.now().date, -90); try{ return (await api('bookingsAll', { since })) || []; }catch(e){ console.warn(e); return []; } },
+      async add(b){ const data = await api('bookingsAdd', { b }); if(data) notify('booking', data.id); return data; },
+      async update(id, patch){ const data = await api('bookingsUpdate', { id, patch }); notify('booking', id); return data; },
+      async remove(id){ await api('bookingsRemove', { id }); },
     },
     on(table, cb){
       (listeners[table] = listeners[table] || []).push(cb);
-      if(table === 'auth') return;
-      sb.channel('rt-' + table + '-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event:'*', schema:'public', table }, p=> cb(p)).subscribe();
+      if(table !== 'auth') startPolling();
     },
   };
 

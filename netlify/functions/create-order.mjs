@@ -1,7 +1,7 @@
 // POST /.netlify/functions/create-order
 // Cria a encomenda na base de dados (com preços recalculados aqui no servidor)
 // e, se o pagamento for online, devolve o link da página de pagamento do Stripe.
-import { assertEnv, getUserFromToken, kvGet, insertOrder, getOrder, updateOrder, applyStock, json } from '../lib/db.mjs';
+import { assertEnv, getUser, kvGet, insertOrder, getOrder, updateOrder, applyStock, json } from '../lib/db.mjs';
 import { priceFor, itemName, shippingFor } from '../lib/pricing.mjs';
 import { createCheckout } from '../lib/stripe.mjs';
 import { notify } from '../lib/notify-core.mjs';
@@ -11,9 +11,8 @@ const clean = (s, n = 200) => String(s ?? '').replace(/[<>]/g, '').trim().slice(
 export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'Método não permitido' });
   try {
-    assertEnv(['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
-    const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
-    const user = await getUserFromToken(token);
+    assertEnv(['DATABASE_URL']);
+    const user = await getUser(req);
     if (!user || !user.id) return json(401, { error: 'Inicia sessão para finalizar a compra.' });
 
     const body = await req.json().catch(() => ({}));

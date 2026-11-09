@@ -3,5 +3,13 @@
   "private": true,
   "type": "module",
   "description": "Xtech Store — site, loja online, pagamentos Stripe e base de dados Supabase",
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "bcryptjs": "^3.0.3",
+    "better-auth": "^1.7.18",
+    "pg": "^8.23.1"
+  }
 }

@@ -1,14 +1,11 @@
 /* =====================================================================
    XTECH STORE — CONFIGURAÇÃO
-   Preenche estes 2 valores com os dados do teu projeto Supabase
-   (Supabase → Project Settings → API).  Ver GUIA-INSTALACAO.md, passo 2.
-
-   Enquanto estiverem vazios, o site funciona em "modo demonstração":
-   tudo fica guardado só neste browser e os pagamentos são simulados.
+   live: true  → o site usa a base de dados Neon (através das funções /api/data e /api/auth).
+   live: false → "modo demonstração": tudo fica guardado só neste browser e os
+                 pagamentos são simulados (útil para testar sem servidor).
    ===================================================================== */
 window.XTECH_CONFIG = {
-  supabaseUrl: 'https://nzpbrifskoiidfnttziy.supabase.co',
-  supabaseAnonKey: 'sb_publishable_JHZ1cYfRigma7N2JdvAm1A_v6uri9He',  // chave "publishable" / "anon public" (é pública, pode estar aqui)
+  live: true,
 
   // Dados da empresa para os Termos e Condições (obrigatórios por lei numa loja online)
   empresa: {

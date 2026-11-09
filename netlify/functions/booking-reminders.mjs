@@ -1,11 +1,11 @@
 // Corre sozinho todos os dias ao fim da tarde: envia o lembrete a quem tem marcação no dia seguinte.
 // (17:00 UTC = 17h no inverno, 18h no verão em Portugal)
 import '../../public/emails.js';
-import { bookingsOn } from '../lib/db.mjs';
+import { bookingsOn, dbOn } from '../lib/db.mjs';
 import { notify } from '../lib/notify-core.mjs';
 
 export default async () => {
-  if (!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY)) return new Response('sem base de dados');
+  if (!dbOn()) return new Response('sem base de dados');
   const X = globalThis.XEmails;
   const tomorrow = X.addDays(X.lisbonToday(), 1);
   const list = await bookingsOn(tomorrow);

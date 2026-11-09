@@ -1,0 +1,6 @@
+node_modules
+.env*
+scripts
+neon
+supabase
+GUIA-INSTALACAO.md

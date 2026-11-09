@@ -6,7 +6,8 @@ import { sendMail, shopEmail, mailProvider } from './mailer.mjs';
 
 const X = globalThis.XEmails;
 const TABLE = { order: 'orders', return: 'returns', booking: 'bookings' };
-export const siteUrl = () => (process.env.SITE_URL || process.env.URL || '').replace(/\/$/, '');
+import { siteUrl } from './auth.mjs';
+export { siteUrl };
 
 export async function notify(kind, id, opts = {}) {
   const table = TABLE[kind];

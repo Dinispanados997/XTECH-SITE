@@ -13,7 +13,7 @@ const stamp = (o, status, extra = {}) => ({
 
 export default async (req) => {
   try {
-    assertEnv(['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'STRIPE_WEBHOOK_SECRET']);
+    assertEnv(['DATABASE_URL', 'STRIPE_WEBHOOK_SECRET']);
     const raw = await req.text();
     if (!verifySignature(raw, req.headers.get('stripe-signature'), process.env.STRIPE_WEBHOOK_SECRET))
       return json(400, { error: 'Assinatura inválida' });
