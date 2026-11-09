@@ -27,8 +27,9 @@
 <meta name="twitter:image" content="__SITE_URL__/og-image.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ElectronicsStore","name":"Xtech Store","image":"__SITE_URL__/og-image.jpg","logo":"__SITE_URL__/icon-512.png","url":"__SITE_URL__/","telephone":"+351923512686","email":"xtechstorept@gmail.com","address":{"@type":"PostalAddress","streetAddress":"Rua da Igreja, n.º 81","postalCode":"4720-492","addressLocality":"Goães, Amares","addressRegion":"Braga","addressCountry":"PT"},"sameAs":["https://www.instagram.com/xtech_.pt/","https://www.tiktok.com/@xtech_.store"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://xdb23jk6uxifgy7a.public.blob.vercel-storage.com" crossorigin>
+<link rel="dns-prefetch" href="https://xdb23jk6uxifgy7a.public.blob.vercel-storage.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#050506; --bg-elev:#0b0c0e; --surface:#131418; --surface-2:#1b1c21;
@@ -5297,6 +5298,10 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 #page-loja .is-acc .product-img.acc-photo img{padding:4% !important; object-fit:contain !important;}
 /* acessório com foto: cartão como o dos telemóveis, a foto ocupa toda a largura do cartão em fundo branco */
 #page-loja .product-card:not(.is-acc) .product-img.acc-photo{background:#fff !important; aspect-ratio:1/1 !important;}
+/* equipamentos: foto quadrada (as fotos têm fundo próprio) e cartões da mesma altura */
+#page-loja .products-grid{align-items:stretch;}
+#page-loja .product-card{height:100%;}
+#page-loja .product-card:not(.is-acc) .product-img:has(img[src*="-cor."]){aspect-ratio:1/1 !important; border-bottom:0 !important;}
 #page-loja .product-card:not(.is-acc) .product-img.acc-photo img{padding:3% !important; object-fit:contain !important;}
 #page-loja .is-acc .product-body{padding:12px 14px; min-width:0;}
 #page-loja .is-acc .product-body h4{font-size:15px !important; margin-bottom:2px;}
@@ -5455,7 +5460,5 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
     .observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-<link rel="stylesheet" href="design.css">
-<script src="design.js"></script>
 </body>
 </html>
