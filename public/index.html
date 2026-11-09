@@ -806,7 +806,11 @@ h1.admin-title{font-size:34px;}
   #site-view .hero p.sub{font-size:15px; margin-bottom:18px;}
   .fx-words{justify-content:flex-start; padding:14vh 0 0;}
   .fx-word{font-size:min(21vw, 16vh);}
-  .fx-front{top:86px; translate:-50% 0; height:var(--fxh, clamp(220px, calc(100svh - 450px), 420px));}
+  .fx-front{top:76px; translate:-50% 0; height:var(--fxh, 72svh);}
+  /* o texto do topo fica por cima da parte de baixo do iPhone, com um fundo escuro a desvanecer para se ler bem */
+  #site-view .hero .hero-grid > div:first-child{z-index:6;}
+  #site-view .hero .hero-grid > div:first-child::before{content:''; position:absolute; z-index:-1; left:-20px; right:-20px; top:-110px; bottom:-140px;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.78) 32%, #000 62%); pointer-events:none;}
   .fx-pair{top:45%; height:min(70vh, 620px);}
   .fx-scrollhint{display:none;}
   #site-view .banners{padding:80px 20px 20px;}
@@ -3956,11 +3960,9 @@ async function sendChatMessage(){
     try{ phoneGL = createPhoneGL(scene.querySelector('.fx-gl')); }catch(e){ phoneGL = null; }
     if(phoneGL) scene.classList.add('fx-has-gl');
     const fitThickness = ()=>{
-      // telemóvel/tablet: o iPhone ocupa todo o espaço livre entre o topo e o texto
-      if(window.innerWidth <= 900 && textBlock){
-        const sr0 = scene.getBoundingClientRect(), tb = textBlock.getBoundingClientRect();
-        const avail = (tb.top - sr0.top) - 86 - 46;   // 46: folga + o texto ainda pode estar a entrar (desce até 24px)
-        const h = Math.max(220, Math.min(avail, window.innerHeight * .62, window.innerWidth * 1.6));
+      // telemóvel/tablet: iPhone grande como no computador (~72% do ecrã); o texto fica por cima, sobre um fundo escuro
+      if(window.innerWidth <= 900){
+        const h = Math.max(260, Math.min(window.innerHeight * .72, window.innerWidth * 1.75));
         scene.style.setProperty('--fxh', Math.round(h) + 'px');
       } else scene.style.removeProperty('--fxh');
       thickT = Math.max(14, front.offsetWidth * 0.118);                       // ~ proporção real do iPhone
