@@ -1934,7 +1934,7 @@ function renderCatalog(){
   if(catalogSort==='desc') list = [...list].sort((a,b)=>b.price-a.price);
   const cnt = document.getElementById('catalog-count'); if(cnt) cnt.textContent = list.length + (list.length===1 ? ' artigo' : ' artigos');
   const card = item => `
-    <div class="product-card${item.type==='accessory'?' is-acc':''}" onclick="openProductDetail('${item.type}',${item.id})" style="cursor:pointer;">
+    <div class="product-card${item.type==='accessory' && !item.photo ? ' is-acc' : ''}" onclick="openProductDetail('${item.type}',${item.id})" style="cursor:pointer;">
       <div class="product-img${item.photo && item.type==='accessory' ? ' acc-photo' : ''}">${item.photo ? `<img src="${item.photo}" alt="${item.name}" loading="lazy" style="width:100%; height:100%; object-fit:contain; padding:9%; box-sizing:border-box;">` : (item.type==='device' ? productSvg() : accessorySvg(item.cat))}</div>
       <div class="product-body">
         <div class="brand">${item.cat}</div>
@@ -5288,7 +5288,9 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 /* acessório com foto (fotos de fornecedor com fundo branco): quadrado branco, a foto enche-o */
 #page-loja .is-acc .product-img.acc-photo{background:#fff !important; aspect-ratio:1/1 !important; width:112px; flex:0 0 112px; align-self:center; margin:12px 0 12px 12px; border-radius:12px; border-right:0; overflow:hidden;}
 #page-loja .is-acc .product-img.acc-photo img{padding:4% !important; object-fit:contain !important;}
-#page-loja .product-card:not(.is-acc) .product-img.acc-photo{background:#fff !important;}
+/* acessório com foto: cartão como o dos telemóveis, a foto ocupa toda a largura do cartão em fundo branco */
+#page-loja .product-card:not(.is-acc) .product-img.acc-photo{background:#fff !important; aspect-ratio:1/1 !important;}
+#page-loja .product-card:not(.is-acc) .product-img.acc-photo img{padding:3% !important; object-fit:contain !important;}
 #page-loja .is-acc .product-body{padding:12px 14px; min-width:0;}
 #page-loja .is-acc .product-body h4{font-size:15px !important; margin-bottom:2px;}
 #page-loja .is-acc .product-body .cond{font-size:12.5px; margin-bottom:6px;}
