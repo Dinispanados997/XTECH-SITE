@@ -28,6 +28,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ElectronicsStore","name":"Xtech Store","image":"__SITE_URL__/og-image.jpg","logo":"__SITE_URL__/icon-512.png","url":"__SITE_URL__/","telephone":"+351923512686","email":"xtechstorept@gmail.com","address":{"@type":"PostalAddress","streetAddress":"Rua da Igreja, n.º 81","postalCode":"4720-492","addressLocality":"Goães, Amares","addressRegion":"Braga","addressCountry":"PT"},"sameAs":["https://www.instagram.com/xtech_.pt/","https://www.tiktok.com/@xtech_.store"]}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#050506; --bg-elev:#0b0c0e; --surface:#131418; --surface-2:#1b1c21;
@@ -4914,7 +4915,8 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
     const accs = (typeof accessories !== 'undefined' && Array.isArray(accessories)) ? accessories : [];
     devs.forEach(d => {
       if (d.qty !== undefined && Number(d.qty) <= 0) return;
-      const photo = (d.photos && d.photos[0]) || d.photo || builtinPhoto(d.model);
+      // a montra 3D usa o recorte sem fundo (as fotos -cor/-palco já têm fundo próprio)
+      const photo = (d.photos || []).find(p => !/-(cor|palco|full)\./.test(p)) || (d.photos && d.photos[0]) || d.photo || builtinPhoto(d.model);
       if (!photo) return;
       out.push({ type:'device', id:d.id, name:[d.brand==='Apple'?'':d.brand, d.model].filter(Boolean).join(' ').trim(),
         tags:[d.storage, d.battery ? 'Bateria '+d.battery : '', d.cond].filter(Boolean), price:d.price, photo, color:d.vitrineColor });
@@ -5125,6 +5127,11 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 .xs-thumb img{object-fit:contain !important; padding:9%; box-sizing:border-box;}
 .xs-thumb img.logo{padding:0;}
 .xp-main{background:var(--stage) !important; aspect-ratio:1/1 !important;}
+/* fotos de equipamentos já com fundo (estúdio): enchem o quadrado todo, sem margem */
+.product-img img[src*="-cor."], .product-img img[src*="-palco."], .product-img img[src*="-full."]{padding:0 !important; object-fit:cover !important; width:100% !important; height:100% !important;}
+.xp-main img[src*="-cor."], .xp-main img[src*="-palco."], .xp-main img[src*="-full."]{width:100% !important; height:100% !important; max-width:100% !important; max-height:100% !important; object-fit:cover !important;}
+.xp-th img[src*="-cor."], .xp-th img[src*="-palco."], .xp-th img[src*="-full."]{object-fit:cover !important; padding:0 !important;}
+.vd-prod img[src*="-cor."], .vd-prod img[src*="-palco."]{object-fit:cover;}
 #product-detail-root.xp-acc .xp-main{background:#fff !important;}
 #product-detail-root.xp-acc .xp-main img{width:94%; height:94%; max-width:94%; max-height:94%; object-fit:contain;}
 #product-detail-root.xp-acc .xp-th{background:#fff !important;}
@@ -5448,5 +5455,7 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
     .observe(document.body, { childList: true, subtree: true });
 })();
 </script>
+<link rel="stylesheet" href="design.css">
+<script src="design.js"></script>
 </body>
 </html>
