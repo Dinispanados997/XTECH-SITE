@@ -9,9 +9,9 @@
 /* global XDB, XAgenda, devices, accessories, showPage, openProductDetail, toggleChat, quoteChatSummary, toast, Agenda */
 (function(){
   'use strict';
-  const S = { phone:'923 512 686', wa:'351923512686', email:'xtechstorept@gmail.com', addr:'Largo Dom Gualdim Pais 21, 4720 Amares — Braga',
+  const S = { phone:'923 512 686', wa:'351923512686', email:'xtechstorept@gmail.com', addr:'Rua da Igreja, n.º 81, 4720-492 Goães, Amares — Braga',
     hours:'segunda a sexta das 9h30 às 19h, sábado das 10h às 13h (domingo fechado)',
-    maps:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Xtech Store, Largo Dom Gualdim Pais 21, 4720 Amares') };
+    maps:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Rua da Igreja 81, 4720-492 Goães, Amares') };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
   const money = n => (Math.round((Number(n)||0)*100)/100).toLocaleString('pt-PT', { minimumFractionDigits:0, maximumFractionDigits:2 }) + ' €';

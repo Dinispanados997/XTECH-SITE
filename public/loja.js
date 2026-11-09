@@ -15,9 +15,24 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmtDate = d => { try{ return new Date(d).toLocaleDateString('pt-PT', {day:'numeric', month:'short', year:'numeric'}); }catch(e){ return ''; } };
   const fmtDT = d => { try{ return new Date(d).toLocaleString('pt-PT', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } };
-  const STORE = { phone:'923 512 686', email:'xtechstorept@gmail.com', addr:'Largo Dom Gualdim Pais 21, Amares — Braga' };
+  const STORE = { phone:'923 512 686', email:'xtechstorept@gmail.com', addr:'Rua da Igreja, n.º 81, 4720-492 Goães, Amares — Braga' };
   const RETURN_DAYS = 14;
   const EMP = (window.XTECH_CONFIG && window.XTECH_CONFIG.empresa) || {};
+  // pagamentoOnline: false → o cliente paga por MB WAY ou transferência e a loja confirma no painel (ver config.js)
+  const ONLINE = !!(window.XTECH_CONFIG && window.XTECH_CONFIG.pagamentoOnline);
+  const payLabel = o=> o.payment_method === 'loja' ? 'Na loja, ao levantar' : o.payment_method === 'transferencia' ? 'MB WAY / transferência' : (PAID_WITH[o.paid_with] || 'Online');
+  // dados para pagar (escritos pela loja em Definições da loja → Pagamentos)
+  function payBoxHTML(o){
+    const s = settings || {}; const rows = [];
+    if(s.payMbway) rows.push(`<span>MB WAY</span><b class="xs-copy">${esc(s.payMbway)}</b>`);
+    if(s.payIban) rows.push(`<span>IBAN</span><b class="xs-copy">${esc(s.payIban)}</b>` + (s.payHolder ? `<span>Titular</span><b>${esc(s.payHolder)}</b>` : ''));
+    rows.push(`<span>Valor</span><b>${money(o.total)}</b>`, `<span>Nota</span><b class="xs-copy">${esc(o.number)}</b>`);
+    const how = s.payMbway && s.payIban ? 'por MB WAY ou transferência bancária' : s.payMbway ? 'por MB WAY' : s.payIban ? 'por transferência bancária' : '';
+    return `<div class="xs-card" style="text-align:left"><h2 style="margin-top:0">Como pagar</h2>` +
+      (how ? `<p style="margin:0 0 12px">Envia o pagamento ${how} e logo confirmaremos a tua encomenda.</p><div class="xs-kv">${rows.join('')}</div><div class="xs-alert info" style="margin:14px 0 0">Na nota ${s.payMbway && s.payIban ? 'do MB WAY ou da transferência' : s.payMbway ? 'do MB WAY' : 'da transferência'}, escreve o número da encomenda: <b>${esc(o.number)}</b></div>`
+           : `<p class="xs-muted" style="margin:0">Vamos enviar-te os dados para pagamento por email. Dúvidas: ${esc(STORE.phone)}.</p>`) +
+      `<p class="xs-muted" style="font-size:13px;margin:12px 0 0">Assim que confirmarmos o pagamento, recebes um email e a encomenda avança.</p></div>`;
+  }
 
   const STATUS = {
     por_pagar:        {l:'Aguarda pagamento', t:'warn'},
@@ -171,7 +186,7 @@
       <div class="xs-tot big"><span>Total</span><span>${money(v.subtotal)}</span></div>
       ${v.problems ? `<div class="xs-alert">Remove os artigos indisponíveis para continuar.</div>` : ''}
       <button class="xs-btn block" data-go="checkout" ${v.problems?'disabled':''}>Finalizar compra</button>
-      <div class="xs-paylogos"><span>MB WAY</span><span>Multibanco</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>Google Pay</span></div>`;
+      ${ONLINE ? '<div class="xs-paylogos"><span>MB WAY</span><span>Multibanco</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>Google Pay</span></div>' : '<div class="xs-paylogos"><span>MB WAY</span><span>Transferência</span><span>Na loja</span></div>'}`;
   }
 
   /* ---------- botões do catálogo e da página de produto ---------- */
@@ -189,7 +204,7 @@
       if(st != null && st <= 0){ b.textContent = 'Esgotado'; b.disabled = true; b.style.opacity = '.45'; }
       else b.textContent = 'Adicionar ao carrinho';
     });
-    $$('#product-detail-root .xp-fine').forEach(p=> p.textContent = st != null && st > 0 && st <= 2 ? `Últimas ${st} unidade${st>1?'s':''}. Paga online com MB WAY, Multibanco ou cartão, ou paga ao levantar na loja.` : 'Paga online com MB WAY, Multibanco ou cartão, ou paga ao levantar na nossa loja em Amares.');
+    $$('#product-detail-root .xp-fine').forEach(p=> p.textContent = st != null && st > 0 && st <= 2 ? `Últimas ${st} unidade${st>1?'s':''}. ${ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão' : 'Paga por MB WAY ou transferência'}, ou paga ao levantar.` : (ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão, ou paga ao levantar na oficina em Goães, Amares.' : 'Paga por MB WAY ou transferência bancária, ou paga ao levantar na oficina em Goães, Amares.'));
   }
 
   /* =====================================================================
@@ -306,7 +321,7 @@
   /* =====================================================================
      CHECKOUT
      ===================================================================== */
-  const co = { method:'pickup', pay:'online', addrIdx:-1, address:'', zip:'', city:'', name:'', phone:'', nif:'', notes:'', terms:false, saveData:true, busy:false, error:'' };
+  const co = { method:'pickup', pay:(ONLINE ? 'online' : 'transferencia'), addrIdx:-1, address:'', zip:'', city:'', name:'', email:'', phone:'', nif:'', notes:'', terms:false, saveData:true, busy:false, error:'' };
 
   function ensurePage(id, cls){
     let p = document.getElementById(id);
@@ -323,6 +338,7 @@
     const m = user.meta || {};
     if(!co.name) co.name = m.name || user.name || '';
     if(!co.phone) co.phone = m.phone || '';
+    if(!co.email) co.email = user.email || '';
     if(!co.nif) co.nif = m.nif || '';
     const addrs = m.addresses || [];
     if(co.addrIdx === -1 && addrs.length && !co.address){ co.addrIdx = 0; Object.assign(co, { address:addrs[0].address, zip:addrs[0].zip, city:addrs[0].city }); }
@@ -338,7 +354,8 @@
     prefillCheckout();
     const allowShip = settings.allowShipping !== false;
     if(!allowShip) co.method = 'pickup';
-    if(co.method === 'ship' && co.pay === 'loja') co.pay = 'online';
+    if(co.method === 'ship' && co.pay === 'loja') co.pay = ONLINE ? 'online' : 'transferencia';
+    if(!ONLINE && co.pay === 'online') co.pay = 'transferencia';
     const shipping = XPricing.shippingFor(settings, co.method, v.subtotal);
     const total = Math.round((v.subtotal + shipping)*100)/100;
     const shipFee = XPricing.shippingFor(settings, 'ship', v.subtotal);
@@ -371,6 +388,7 @@
           <section class="xs-card" ${user?'':'style="opacity:.45;pointer-events:none"'}><h2><i>3</i>Os teus dados</h2>
             <div class="xs-f">
               <div class="xs-in"><label>Nome</label><input data-f="name" value="${esc(co.name)}" autocomplete="name"></div>
+              <div class="xs-in full"><label>Email (para receberes o estado da encomenda)</label><input data-f="email" type="email" value="${esc(co.email)}" autocomplete="email" inputmode="email" placeholder="o-teu-email@exemplo.pt"></div>
               <div class="xs-in"><label>Telemóvel</label><input data-f="phone" value="${esc(co.phone)}" autocomplete="tel" inputmode="tel" placeholder="9xx xxx xxx"></div>
               <div class="xs-in full"><label>NIF para a fatura (opcional)</label><input data-f="nif" value="${esc(co.nif)}" inputmode="numeric" placeholder="Sem NIF = consumidor final"></div>
             </div>
@@ -378,7 +396,8 @@
           </section>
 
           <section class="xs-card" ${user?'':'style="opacity:.45;pointer-events:none"'}><h2><i>4</i>Pagamento</h2>
-            <button class="xs-opt ${co.pay==='online'?'on':''}" data-pay="online"><span class="r"></span><span><b>Pagar agora online</b><small>Pagamento seguro numa página da Stripe.</small><span class="xs-chips"><span>MB WAY</span><span>Multibanco</span><span>Cartão</span><span>Apple Pay</span><span>Google Pay</span></span></span></button>
+            ${ONLINE ? '' : `<button class="xs-opt ${co.pay==='transferencia'?'on':''}" data-pay="transferencia"><span class="r"></span><span><b>MB WAY ou transferência bancária</b><small>Depois de encomendares mostramos-te os dados para pagar. Confirmamos o pagamento e a encomenda avança.</small><span class="xs-chips"><span>MB WAY</span><span>Transferência</span></span></span></button>`}
+            ${!ONLINE ? '' : `<button class="xs-opt ${co.pay==='online'?'on':''}" data-pay="online"><span class="r"></span><span><b>Pagar agora online</b><small>Pagamento seguro numa página da Stripe.</small><span class="xs-chips"><span>MB WAY</span><span>Multibanco</span><span>Cartão</span><span>Apple Pay</span><span>Google Pay</span></span></span></button>`}
             <button class="xs-opt ${co.pay==='loja'?'on':''}" data-pay="loja" ${co.method==='pickup'?'':'disabled'}><span class="r"></span><span><b>Pagar na loja ao levantar</b><small>${co.method==='pickup' ? 'Reservamos o artigo e pagas em Amares (dinheiro, MB ou MB WAY).' : 'Disponível só com levantamento na loja.'}</small></span></button>
             <div class="xs-in" style="margin-top:6px"><label>Notas para a loja (opcional)</label><textarea data-f="notes" placeholder="Ex.: prefiro levantar ao fim da tarde">${esc(co.notes)}</textarea></div>
           </section>
@@ -394,8 +413,8 @@
           <label class="xs-check" style="margin-bottom:14px"><input type="checkbox" data-f="terms" ${co.terms?'checked':''}><span>Li e aceito os <a href="javascript:void(0)" onclick="Shop.legal('termos')" style="color:#fff">Termos e Condições</a> e a <a href="javascript:void(0)" onclick="Shop.legal('devolucoes')" style="color:#fff">Política de Devoluções</a>.</span></label>
           ${co.error ? `<div class="xs-alert">${esc(co.error)}</div>` : ''}
           ${v.problems ? `<div class="xs-alert">Há artigos indisponíveis no carrinho. <button class="xs-link" onclick="Shop.openCart()">Rever carrinho</button></div>` : ''}
-          <button class="xs-btn block" data-co="submit" ${(!user || co.busy || v.problems)?'disabled':''}>${co.busy ? 'A processar…' : !user ? 'Entra para continuar' : co.pay==='loja' ? 'Confirmar reserva' : `Pagar ${money(total)}`}</button>
-          <div class="xs-secure">${ICON.lock}${co.pay==='loja' ? 'Sem pagamento agora — pagas ao levantar' : 'Pagamento seguro processado pela Stripe'}</div>
+          <button class="xs-btn block" data-co="submit" ${(!user || co.busy || v.problems)?'disabled':''}>${co.busy ? 'A processar…' : !user ? 'Entra para continuar' : co.pay==='loja' ? 'Confirmar reserva' : co.pay==='transferencia' ? `Encomendar · ${money(total)}` : `Pagar ${money(total)}`}</button>
+          <div class="xs-secure">${ICON.lock}${co.pay==='loja' ? 'Sem pagamento agora — pagas ao levantar' : co.pay==='transferencia' ? 'Pagas por MB WAY ou transferência a seguir' : 'Pagamento seguro processado pela Stripe'}</div>
         </aside>
       </div></div>`;
   }
@@ -426,6 +445,7 @@
     co.error = '';
     if(!user){ openAuth('login', ()=> showPage('checkout')); return; }
     if(!co.name.trim()) co.error = 'Indica o teu nome.';
+    else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(co.email.trim())) co.error = 'Indica um email válido — é para lá que enviamos o estado da encomenda.';
     else if(!/^[+\d][\d\s]{8,}$/.test(co.phone.trim())) co.error = 'Indica um número de telemóvel válido (para te contactarmos sobre a encomenda).';
     else if(co.nif && !/^\d{9}$/.test(co.nif.replace(/\s/g,''))) co.error = 'O NIF tem de ter 9 dígitos.';
     else if(co.method === 'ship' && (!co.address.trim() || !co.zip.trim() || !co.city.trim())) co.error = 'Preenche a morada de envio completa.';
@@ -448,7 +468,7 @@
       const payload = {
         items: cart.map(l=> ({ type:l.type, id:l.id, opts:l.opts, qty:l.qty })),
         delivery: co.method === 'ship' ? { method:'ship', address:co.address.trim(), zip:co.zip.trim(), city:co.city.trim() } : { method:'pickup' },
-        customer: { name: co.name.trim(), phone: co.phone.trim(), nif: co.nif.replace(/\s/g,'') },
+        customer: { name: co.name.trim(), email: co.email.trim().toLowerCase(), phone: co.phone.trim(), nif: co.nif.replace(/\s/g,'') },
         payment: co.pay, notes: co.notes.trim(),
       };
       const r = await XDB.orders.create(payload);
@@ -497,10 +517,12 @@
       if(!o){ page.innerHTML = `<div class="wrap xs-page"><div class="xs-thanks"><h1>Encomenda não encontrada</h1><p class="lead">Entra na tua conta para veres as tuas encomendas.</p><button class="xs-btn" onclick="Shop.openAccount()">A minha conta</button></div></div>`; clearInterval(thanksTimer); return; }
       const paid = !['por_pagar','pagamento_falhou','cancelada'].includes(o.status);
       const waitingMB = o.status === 'por_pagar' && o.paid_with === 'multibanco';
-      const cancelled = state === 'cancelado' && o.status === 'por_pagar' && !waitingMB;
+      const waitingTr = o.status === 'por_pagar' && o.payment_method === 'transferencia';
+      const cancelled = !waitingTr && state === 'cancelado' && o.status === 'por_pagar' && !waitingMB;
       let icon = ICON.check, title = 'Obrigado pela tua encomenda!', sub = '';
       if(o.status === 'pagar_na_loja'){ title = 'Reserva confirmada!'; sub = 'Guardámos o artigo para ti. Pagas quando vieres levantar — avisamos-te quando estiver pronto.'; }
       else if(paid){ sub = o.delivery.method === 'ship' ? 'Pagamento confirmado. Vamos preparar a encomenda e enviamos-te o código de seguimento.' : 'Pagamento confirmado. Avisamos-te quando estiver pronta a levantar na loja.'; }
+      else if(waitingTr){ icon = ICON.clock; title = 'Encomenda confirmada!'; sub = 'Agora envia o pagamento para o MB WAY ou IBAN abaixo e logo confirmaremos a tua encomenda. Também te enviámos estes dados por email.'; }
       else if(waitingMB){ icon = ICON.clock; title = 'Falta pagar a referência'; sub = 'Assim que pagares a referência Multibanco (enviada para o teu email), a encomenda avança automaticamente.'; }
       else if(cancelled || o.status === 'pagamento_falhou'){ icon = '!'; title = o.status === 'pagamento_falhou' ? 'O pagamento falhou' : 'Pagamento não concluído'; sub = 'A encomenda ficou guardada. Podes tentar pagar outra vez.'; }
       else { icon = ''; title = 'A confirmar o pagamento…'; sub = 'Isto demora só uns segundos.'; }
@@ -513,6 +535,7 @@
           ${(o.items||[]).map(l=>`<div class="xs-line sm">${thumb(l.photo)}<div><div class="xs-lname" style="font-size:14px">${esc(l.name)}${l.qty>1?` × ${l.qty}`:''}</div><div class="xs-lopts">${(l.options||[]).map(x=>esc(x.name)).join(' · ')}</div></div><div class="xs-lprice" style="font-size:14px">${money(l.total)}</div></div>`).join('')}
           <div class="xs-tot big" style="margin-bottom:0"><span>Total</span><span>${money(o.total)}</span></div>
         </div>
+        ${waitingTr ? payBoxHTML(o) : ''}
         <div class="xs-row" style="justify-content:center;margin-top:24px;flex-wrap:wrap">
           ${(cancelled || o.status==='pagamento_falhou') ? `<button class="xs-btn" onclick="Shop.payAgain(${o.id})">Tentar pagar outra vez</button>` : ''}
           <button class="xs-btn ${cancelled?'ghost':''}" onclick="Shop.openAccount('orders', ${o.id})">Acompanhar encomenda</button>
@@ -614,11 +637,13 @@
     const ship = o.delivery && o.delivery.method === 'ship';
     const rets = acc.data.returns.filter(r=> r.order_id === o.id);
     const unpaid = o.payment_method === 'online' && ['por_pagar','pagamento_falhou'].includes(o.status);
+    const waitingTr = o.payment_method === 'transferencia' && o.status === 'por_pagar';
     const waitingMB = o.status === 'por_pagar' && o.paid_with === 'multibanco';
     return `<button class="xs-back" data-acc="back">${ICON.back} Todas as encomendas</button>
       <div class="xs-card">
         <div class="xs-row" style="flex-wrap:wrap;margin-bottom:16px"><h2 style="margin:0">${esc(o.number)}</h2><span class="xs-muted">${fmtDT(o.created_at)}</span><span class="xs-sp"></span>${pill(STATUS, o.status)}</div>
         ${['cancelada','reembolsada'].includes(o.status) ? '' : stepsFor(o)}
+        ${waitingTr ? `<div style="margin-top:16px">${payBoxHTML(o)}</div>` : ''}
         ${waitingMB ? `<div class="xs-alert info">Gerámos uma referência Multibanco (vê o teu email). Assim que for paga, a encomenda avança sozinha.</div>` : ''}
         ${o.tracking && o.tracking.code ? `<div class="xs-alert ok" style="margin-top:16px">Enviada por <b>${esc(o.tracking.company||'transportadora')}</b> · código de seguimento <span class="xs-copy">${esc(o.tracking.code)}</span></div>` : ''}
         ${o.status === 'pronta' ? `<div class="xs-alert ok" style="margin-top:16px">Está pronta! Levanta na loja: ${esc(STORE.addr)}.${o.payment_method==='loja' ? ` Pagas ${money(o.total)} no momento.` : ''}</div>` : ''}
@@ -638,7 +663,7 @@
       </div>
       <div class="xs-grid2" style="margin-top:16px">
         <div class="xs-card" style="margin:0"><h2>Entrega</h2><div class="xs-kv">${ship ? `<span>Envio para</span><b>${esc(o.delivery.address)}<br>${esc(o.delivery.zip)} ${esc(o.delivery.city)}</b>` : `<span>Levantar em</span><b>Xtech Store<br>${esc(STORE.addr)}</b>`}<span>Contacto</span><b>${esc(o.name)} · ${esc(o.phone)}</b></div></div>
-        <div class="xs-card" style="margin:0"><h2>Pagamento</h2><div class="xs-kv"><span>Forma</span><b>${o.payment_method==='loja' ? 'Na loja, ao levantar' : (PAID_WITH[o.paid_with] || 'Online')}</b><span>NIF</span><b>${esc(o.nif || 'Consumidor final')}</b></div></div>
+        <div class="xs-card" style="margin:0"><h2>Pagamento</h2><div class="xs-kv"><span>Forma</span><b>${payLabel(o)}</b><span>NIF</span><b>${esc(o.nif || 'Consumidor final')}</b></div></div>
       </div>
       ${rets.length ? `<div class="xs-card"><h2>Devoluções desta encomenda</h2>${rets.map(r=>`<div class="xs-row" style="padding:8px 0">${esc(r.items||'')}<span class="xs-sp"></span>${pill(RSTATUS, r.status)}</div>`).join('')}</div>` : ''}
       <p class="xs-muted" style="font-size:13.5px;margin-top:18px">Dúvidas sobre esta encomenda? Liga ${STORE.phone} ou escreve para ${STORE.email} e indica o número ${esc(o.number)}.</p>`;
@@ -788,7 +813,7 @@
       <h2 id="lg-termos">Termos e Condições de venda</h2>
       <p>O site é explorado por ${esc(EMP.nomeLegal || 'Xtech Store')}${EMP.nomeLegal ? ' (Xtech Store)' : ''}, ${esc(STORE.addr)}${EMP.nif ? ', NIF ' + esc(EMP.nif) : ''}. Contactos: ${esc(STORE.phone)} · ${esc(STORE.email)}. Os preços incluem IVA à taxa legal em vigor. A encomenda considera-se aceite após a confirmação do pagamento (ou, no pagamento na loja, após a nossa confirmação da reserva). As reservas com pagamento na loja ficam guardadas 3 dias úteis após avisarmos que estão prontas.</p>
       <h2 id="lg-pagamentos">Pagamentos</h2>
-      <p>Aceitamos MB WAY, referência Multibanco, cartão de crédito/débito, Apple Pay e Google Pay, processados de forma segura pela Stripe. Não guardamos dados de cartões. Também é possível pagar na loja ao levantar.</p>
+      <p>${ONLINE ? 'Aceitamos MB WAY, referência Multibanco, cartão de crédito/débito, Apple Pay e Google Pay, processados de forma segura pela Stripe. Não guardamos dados de cartões.' : 'Aceitamos pagamento por MB WAY ou transferência bancária, com os dados indicados depois de fazeres a encomenda. Na nota do pagamento indica o número da encomenda. A encomenda avança quando confirmarmos o pagamento.'} Também é possível pagar na loja ao levantar.</p>
       <h2 id="lg-envios">Envios e levantamento</h2>
       <p>Levantamento gratuito na loja em Amares. Envios para Portugal continental, normalmente expedidos em 1 a 2 dias úteis após o pagamento, com código de seguimento visível na tua conta.</p>
       <h2 id="lg-devolucoes">Devoluções e direito de livre resolução</h2>
@@ -877,7 +902,7 @@
         ${thumb((o.items[0]||{}).photo)}
         <div><div class="t">${NEEDS_ACTION.includes(o.status)?'<span class="xs-new"></span>':''}${esc(o.number)} · ${esc(o.name||o.email)}</div>
           <div class="s">${(o.items||[]).map(l=>esc(l.name)+(l.qty>1?` ×${l.qty}`:'')).join(', ')}</div>
-          <div class="s">${fmtDT(o.created_at)} · ${o.delivery.method==='ship'?'Envio':'Levantamento'} · ${o.payment_method==='loja'?'Paga na loja':(PAID_WITH[o.paid_with]||'Online')}</div></div>
+          <div class="s">${fmtDT(o.created_at)} · ${o.delivery.method==='ship'?'Envio':'Levantamento'} · ${o.payment_method==='loja'?'Paga na loja':payLabel(o)}</div></div>
         <div class="r">${pill(STATUS, o.status)}<b>${money(o.total)}</b></div></div>`).join('')
       : `<div class="empty-inline" style="padding:26px 6px">${adm.loaded ? 'Sem encomendas neste filtro.' : 'A carregar…'}</div>`;
     if(keepFocus === true && $('#xs-aq')){ box.querySelector('.panel').innerHTML = rows; return; }
@@ -1021,10 +1046,18 @@
       <label class="xs-check" style="margin-bottom:14px;color:#fff"><input type="checkbox" id="xs-s-ship" ${s.allowShipping!==false?'checked':''}>Fazer envios para casa</label>
       <div class="xs-f"><div class="xs-in"><label>Custo do envio (€)</label><input id="xs-s-fee" type="number" step="0.01" min="0" value="${s.shipFee!=null?s.shipFee:4.9}"></div>
       <div class="xs-in"><label>Envio grátis a partir de (€)</label><input id="xs-s-free" type="number" step="1" min="0" value="${s.freeShipFrom||0}" placeholder="0 = nunca"></div></div>
-      <p class="xs-muted" style="font-size:12.5px;line-height:1.5">O levantamento na loja é sempre grátis. As formas de pagamento online (MB WAY, Multibanco, cartão…) ligam-se no painel da Stripe → Definições → Métodos de pagamento.</p>
+      <p class="xs-muted" style="font-size:12.5px;line-height:1.5">O levantamento na loja é sempre grátis.</p>
+      <h4 style="margin:18px 0 6px">Pagamentos (MB WAY / transferência)</h4>
+      <p class="xs-muted" style="font-size:12.5px;line-height:1.5;margin-top:0">Aparecem ao cliente depois de encomendar e no email. Quando receberes o dinheiro, abre a encomenda e carrega em <b>Paga</b>.</p>
+      <div class="xs-f"><div class="xs-in"><label>Número MB WAY</label><input id="xs-s-mbw" inputmode="tel" value="${esc(s.payMbway||'')}" placeholder="9xx xxx xxx"></div>
+      <div class="xs-in"><label>Titular da conta</label><input id="xs-s-hold" value="${esc(s.payHolder||'')}" placeholder="Nome que aparece no banco"></div>
+      <div class="xs-in full"><label>IBAN</label><input id="xs-s-iban" value="${esc(s.payIban||'')}" placeholder="PT50 0000 0000 0000 0000 0000 0"></div></div>
       <button class="xs-btn block" id="xs-s-go">Guardar</button></div>`);
     $('#xs-s-go').onclick = async ()=>{
-      settings = { allowShipping: $('#xs-s-ship').checked, shipFee: Number($('#xs-s-fee').value)||0, freeShipFrom: Number($('#xs-s-free').value)||0 };
+      const iban = $('#xs-s-iban').value.replace(/\s+/g,'').toUpperCase();
+      if(iban && !/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(iban)){ toast('O IBAN não parece válido. Confirma-o.'); return; }
+      settings = { ...settings, allowShipping: $('#xs-s-ship').checked, shipFee: Number($('#xs-s-fee').value)||0, freeShipFrom: Number($('#xs-s-free').value)||0,
+        payMbway: $('#xs-s-mbw').value.trim(), payIban: iban.replace(/(.{4})/g,'$1 ').trim(), payHolder: $('#xs-s-hold').value.trim() };
       await storeSet('shopSettings', settings); closeModal(); toast('Definições guardadas.');
     };
   }
@@ -1039,7 +1072,7 @@
   function notifyOrder(o){
     chime();
     const el = document.createElement('div'); el.className = 'xs-toast-order';
-    el.innerHTML = `<span style="font-size:22px">🛍️</span><div>Nova encomenda ${esc(o.number)} — ${money(o.total)}<small>${esc(o.name||o.email)} · ${o.payment_method==='loja'?'paga ao levantar':'paga online'}</small></div>`;
+    el.innerHTML = `<span style="font-size:22px">🛍️</span><div>Nova encomenda ${esc(o.number)} — ${money(o.total)}<small>${esc(o.name||o.email)} · ${o.payment_method==='loja'?'paga ao levantar':o.payment_method==='transferencia'?(o.status==='por_pagar'?'a aguardar MB WAY / transferência':'paga por MB WAY / transferência'):'paga online'}</small></div>`;
     el.onclick = ()=>{ el.remove(); if(isAdminOpen()){ window.switchAdminTab('encomendas'); window.setOrdersTab('online'); adminOrderModal(o.id); } };
     document.body.appendChild(el); setTimeout(()=> el.remove(), 9000);
     try{ if('Notification' in window && Notification.permission === 'granted') new Notification('Nova encomenda ' + o.number, { body: `${o.name||o.email} · ${money(o.total)}` }); }catch(e){}
@@ -1049,7 +1082,9 @@
     if(!isAdminOpen() || !(await XDB.isStaff())) return;
     const prev = { ...adm.known };
     await loadAdminData();
-    adm.orders.forEach(o=>{ if(NEEDS_ACTION.includes(o.status) && !NEEDS_ACTION.includes(prev[o.id]) && !['em_preparacao','pronta','enviada','entregue','levantada'].includes(prev[o.id])) notifyOrder(o); });
+    adm.orders.forEach(o=>{ const novaTr = o.payment_method === 'transferencia' && o.status === 'por_pagar' && !prev[o.id];
+      if(novaTr) notifyOrder(o);
+      else if(NEEDS_ACTION.includes(o.status) && !NEEDS_ACTION.includes(prev[o.id]) && !['em_preparacao','pronta','enviada','entregue','levantada'].includes(prev[o.id])) notifyOrder(o); });
     if(adm.sub) drawAdminList();
   }
 

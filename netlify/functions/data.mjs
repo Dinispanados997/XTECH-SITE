@@ -7,7 +7,7 @@
 // POST /api/data?op=upload  (corpo = imagem)  → guarda uma fotografia no Vercel Blob (só a equipa)
 import { q, one, asJson, dbOn } from '../lib/sql.mjs';
 import { getAuth } from '../lib/auth.mjs';
-import { json, getUser, isStaffEmail, kvSet, insertRow, updateRow, getRow, clientIp } from '../lib/db.mjs';
+import { json, getUser, isStaffEmail, kvSet, insertRow, updateRow, getRow, clientIp, restoreStock } from '../lib/db.mjs';
 
 const PUBLIC_KV = ['devices', 'accessories', 'carriers', 'shopSettings', 'agendaSettings'];
 const err = (status, msg) => Object.assign(new Error(msg), { status });
@@ -82,7 +82,9 @@ const OPS = {
   },
   async ordersCancelMine({ user, a }) {
     if (!user) throw err(401, 'Inicia sessão primeiro.');
-    return one('select (public.cancel_my_order($1, $2)).*', [Number(a.id), user.id]);
+    const o = await one('select * from public.cancel_my_order($1, $2)', [Number(a.id), user.id]);
+    if (o && o.stock_done) { await restoreStock(o); o.stock_done = false; }
+    return o;
   },
 
   // ---------- devoluções ----------
@@ -143,7 +145,7 @@ const OPS = {
   },
   async bookingsCancelMine({ user, a }) {
     if (!user) throw err(401, 'Inicia sessão primeiro.');
-    return one('select (public.cancel_my_booking($1, $2)).*', [Number(a.id), user.id]);
+    return one('select * from public.cancel_my_booking($1, $2)', [Number(a.id), user.id]);
   },
   async bookingsAll({ staff, a }) {
     if (!staff) return [];

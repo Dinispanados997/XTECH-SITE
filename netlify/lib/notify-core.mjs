@@ -1,7 +1,7 @@
 // Decide e envia os emails automáticos de uma encomenda, devolução ou marcação.
 // As regras e os textos estão em public/emails.js (os mesmos que o site usa no modo demonstração).
 import '../../public/emails.js';
-import { getRow, rpc, pendingQuotes, claimQuote, unclaimQuote } from './db.mjs';
+import { getRow, rpc, pendingQuotes, claimQuote, unclaimQuote, kvGet } from './db.mjs';
 import { sendMail, shopEmail, mailProvider } from './mailer.mjs';
 
 const X = globalThis.XEmails;
@@ -16,6 +16,7 @@ export async function notify(kind, id, opts = {}) {
   if (!rec) return { skipped: 'não encontrado' };
   const ctx = { siteUrl: siteUrl(), mb: opts.mb };
   if (kind === 'return') ctx.order = await getRow('orders', rec.order_id);
+  if (kind === 'order' && rec.payment_method === 'transferencia') ctx.pay = (await kvGet('shopSettings').catch(() => null)) || {};
   if (kind === 'return' && !rec.email && ctx.order) rec.email = ctx.order.email;
 
   const configured = !!mailProvider();

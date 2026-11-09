@@ -13,8 +13,8 @@
   const $ = (s, r)=> (r||document).querySelector(s);
   const $$ = (s, r)=> [...(r||document).querySelectorAll(s)];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const STORE = { name:'Xtech Store', phone:'923 512 686', wa:'351923512686', addr:'Largo Dom Gualdim Pais 21, 4720 Amares — Braga' };
-  const MAPS = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Xtech Store, Largo Dom Gualdim Pais 21, 4720 Amares');
+  const STORE = { name:'Xtech Store', phone:'923 512 686', wa:'351923512686', addr:'Rua da Igreja, n.º 81, 4720-492 Goães, Amares — Braga' };
+  const MAPS = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Rua da Igreja 81, 4720-492 Goães, Amares');
 
   // estados: o que o cliente vê / o que o admin vê
   const ST = {
@@ -469,7 +469,7 @@
     const b = adm.list.find(x=> x.id === id); if(!b) return;
     const sv = A.service(b.service);
     const first = (b.name||'').split(' ')[0];
-    const msgConfirm = `Olá ${first}! Confirmamos a tua marcação na Xtech Store: ${b.service_label || sv.l}${b.device ? ' (' + b.device + ')' : ''}, ${dayLong(b.day)} às ${b.slot}. Morada: Largo Dom Gualdim Pais 21, Amares. Até já!`;
+    const msgConfirm = `Olá ${first}! Confirmamos a tua marcação na Xtech Store: ${b.service_label || sv.l}${b.device ? ' (' + b.device + ')' : ''}, ${dayLong(b.day)} às ${b.slot}. Morada: Rua da Igreja, n.º 81, 4720-492 Goães, Amares. Até já!`;
     const msgReady = `Olá ${first}! O teu ${b.device || 'equipamento'} já está pronto na Xtech Store. Podes passar a levantar (seg–sex 9h30–19h, sáb 10h–13h).`;
     const rep = b.repair_id && typeof repairs !== 'undefined' ? repairs.find(r=> r.id === b.repair_id) : null;
     renderModal(`<div class="modal-box ag-modal" data-agm="${b.id}">

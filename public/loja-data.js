@@ -428,15 +428,15 @@
         if(!items.length) throw new Error('O carrinho está vazio.');
         const d = body.delivery||{}; const method = d.method==='ship' ? 'ship' : 'pickup';
         const subtotal = Math.round(items.reduce((s,x)=>s+x.total,0)*100)/100; const shipping = XPricing.shippingFor(settings, method, subtotal);
-        const payInStore = body.payment==='loja' && method==='pickup'; const status = payInStore ? 'pagar_na_loja' : 'por_pagar';
+        const payInStore = body.payment==='loja' && method==='pickup'; const payTr = body.payment==='transferencia'; const status = payInStore ? 'pagar_na_loja' : 'por_pagar';
         const list = await dlist('demo_orders'); const id = nextId(list);
-        const o = { id, number:'XT-' + String(id).padStart(5,'0'), user_id:u.id, email:u.email, name:(body.customer||{}).name||u.name, phone:(body.customer||{}).phone||'', nif:(body.customer||{}).nif||'',
+        const o = { id, number:'XT-' + String(id).padStart(5,'0'), user_id:u.id, email:((body.customer||{}).email||u.email).toLowerCase(), name:(body.customer||{}).name||u.name, phone:(body.customer||{}).phone||'', nif:(body.customer||{}).nif||'',
           items, subtotal, shipping, total:Math.round((subtotal+shipping)*100)/100, delivery: method==='ship' ? { method, address:d.address, zip:d.zip, city:d.city } : { method },
-          payment_method: payInStore ? 'loja' : 'online', status, tracking:{}, notes: body.notes||'', history:[{status, at:nowIso()}], stock_done:false, created_at:nowIso(), updated_at:nowIso() };
-        if(payInStore) await demoApplyStock(o);
+          payment_method: payInStore ? 'loja' : payTr ? 'transferencia' : 'online', status, tracking:{}, notes: body.notes||'', history:[{status, at:nowIso()}], stock_done:false, created_at:nowIso(), updated_at:nowIso() };
+        if(payInStore || payTr) await demoApplyStock(o);
         demoMail('order', o);
         list.push(o); await dsave('demo_orders', list); emit('orders', { eventType:'INSERT', new:o });
-        return payInStore ? { order:{ id, number:o.number, status } } : { order:{ id, number:o.number, status }, demoPay:true };
+        return (payInStore || payTr) ? { order:{ id, number:o.number, status } } : { order:{ id, number:o.number, status }, demoPay:true };
       },
       async demoPay(id, method, ok){
         const list = await dlist('demo_orders'); const o = list.find(x=>x.id===id); if(!o) return;

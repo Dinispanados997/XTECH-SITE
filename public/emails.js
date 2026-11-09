@@ -11,9 +11,9 @@
   'use strict';
   var STORE = {
     name:'Xtech Store', phone:'923 512 686', phoneIntl:'+351923512686', email:'xtechstorept@gmail.com',
-    addr:'Largo Dom Gualdim Pais 21', city:'4720 Amares — Braga', insta:'@xtech_.pt', instaUrl:'https://www.instagram.com/xtech_.pt/',
+    addr:'Oficina técnica de reparações, Rua da Igreja, n.º 81', city:'4720-492 Goães, Amares', insta:'@xtech_.pt', instaUrl:'https://www.instagram.com/xtech_.pt/',
     hours:'Segunda a sexta 9h30–19h · Sábado 10h–13h',
-    maps:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Xtech Store, Largo Dom Gualdim Pais 21, 4720 Amares'),
+    maps:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Rua da Igreja 81, 4720-492 Goães, Amares'),
   };
   var WD = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
   var WDS = ['dom','seg','ter','qua','qui','sex','sáb'];
@@ -61,9 +61,11 @@
     opts = opts || {}; var out = [], s = o.status;
     if(has(o,'antigo')) return [];
     if(s === 'pagar_na_loja' && !has(o,'reserva')) out.push({ key:'reserva', to:'cliente', tpl:'order_reserva' });
-    if(o.payment_method === 'online' && ORDER_DONE.indexOf(s) >= 0 && !has(o,'paga')) out.push({ key:'paga', to:'cliente', tpl:'order_paga' });
+    var tr = o.payment_method === 'transferencia';
+    if(tr && s === 'por_pagar' && !has(o,'pagamento')) out.push({ key:'pagamento', to:'cliente', tpl:'order_pagamento' });
+    if((o.payment_method === 'online' || tr) && ORDER_DONE.indexOf(s) >= 0 && !has(o,'paga')) out.push({ key:'paga', to:'cliente', tpl:'order_paga' });
     if(opts.mb && s === 'por_pagar' && !has(o,'mb')) out.push({ key:'mb', to:'cliente', tpl:'order_mb' });
-    if((s === 'pagar_na_loja' || (o.payment_method === 'online' && ORDER_DONE.indexOf(s) >= 0)) && !has(o,'loja_nova')) out.push({ key:'loja_nova', to:'loja', tpl:'shop_order' });
+    if((s === 'pagar_na_loja' || (tr && s === 'por_pagar') || (o.payment_method === 'online' && ORDER_DONE.indexOf(s) >= 0)) && !has(o,'loja_nova')) out.push({ key:'loja_nova', to:'loja', tpl:'shop_order' });
     if(s === 'pronta' && !has(o,'pronta')) out.push({ key:'pronta', to:'cliente', tpl:'order_pronta' });
     if(s === 'enviada' && !has(o,'enviada')) out.push({ key:'enviada', to:'cliente', tpl:'order_enviada' });
     if((s === 'entregue' || s === 'levantada') && !has(o,'concluida')) out.push({ key:'concluida', to:'cliente', tpl:'order_concluida' });
@@ -128,6 +130,16 @@
       intro:['Recebemos o teu pagamento de <b>' + money(o.total) + '</b>' + (o.paid_with && PAID_WITH[o.paid_with] ? ' por ' + PAID_WITH[o.paid_with] : '') + '. Vamos preparar tudo e avisamos-te quando estiver ' + ((o.delivery||{}).method === 'ship' ? 'a caminho.' : 'pronto a levantar.')],
       blocks:[{ items:o.items, o:o }, { rows:[['Entrega', deliveryText(o)]].concat(o.nif ? [['NIF na fatura', o.nif]] : []) }, { button:['Ver a minha encomenda', c.siteUrl] },
         { note:'Os equipamentos têm 18 meses de garantia. Compras online podem ser devolvidas até 14 dias depois de as receberes.' }] }; },
+    order_pagamento: function(o, c){ var p = c.pay || {}, rows = [];
+      if(p.payMbway) rows.push(['MB WAY', p.payMbway]);
+      if(p.payIban) rows.push(['IBAN', p.payIban]); if(p.payIban && p.payHolder) rows.push(['Titular', p.payHolder]);
+      rows.push(['Valor', money(o.total)], ['Nota a escrever', o.number]);
+      var how = p.payMbway && p.payIban ? 'para o MB WAY ou IBAN' : p.payMbway ? 'por MB WAY' : p.payIban ? 'por transferência' : '';
+      return { subject:'Encomenda ' + o.number + ' confirmada — falta o pagamento', pre:'Envia ' + money(o.total) + (how ? ' ' + how : '') + ' com a nota ' + o.number + '.',
+      eyebrow:'Encomenda ' + o.number, title:'Falta só o pagamento, ' + first(o.name) + '.',
+      intro:how ? ['Envia o pagamento ' + how + ' e logo confirmaremos a tua encomenda.', 'Na nota do pagamento escreve o número da encomenda: <b>' + esc(o.number) + '</b>.']
+                : ['Vamos enviar-te os dados para pagamento em breve. Se tiveres pressa, liga-nos: ' + STORE.phone + '.'],
+      blocks:(how ? [{ rows:rows, big:true }] : []).concat([{ items:o.items, o:o }, { note:'Assim que confirmarmos o pagamento, recebes um email e a encomenda avança.' }]) }; },
     order_mb: function(o, c){ var m = c.mb || {}; return { subject:'Falta pagar a encomenda ' + o.number + ' — referência Multibanco', pre:'Entidade ' + (m.entity||'') + ' · Referência ' + (m.reference||''),
       eyebrow:'Encomenda ' + o.number, title:'Falta só o pagamento.',
       intro:['Guardámos a tua encomenda. Paga no Multibanco ou no homebanking com estes dados' + (m.expires ? ' até <b>' + esc(m.expires) + '</b>' : '') + ':'],
@@ -191,9 +203,9 @@
       intro:['Só para lembrar: tens marcação amanhã, <b>' + esc(dayLong(b.day)) + ' às ' + esc(b.slot) + '</b>.', 'Se puderes, faz uma cópia de segurança do equipamento antes de vires.'],
       blocks:[{ date:b }, { links:[['Como chegar', STORE.maps]] }, { note:'Já não podes vir? Responde a este email ou liga para o ' + STORE.phone + ' para mudarmos o horário.' }] }; },
 
-    shop_order: function(o, c){ return { subject:'Nova encomenda ' + o.number + ' — ' + money(o.total) + (o.payment_method === 'loja' ? ' (paga ao levantar)' : ' (paga)'), pre:o.name + ' · ' + deliveryText(o),
+    shop_order: function(o, c){ return { subject:'Nova encomenda ' + o.number + ' — ' + money(o.total) + (o.payment_method === 'loja' ? ' (paga ao levantar)' : o.payment_method === 'transferencia' ? ' (a aguardar MB WAY / transferência)' : ' (paga)'), pre:o.name + ' · ' + deliveryText(o),
       eyebrow:'Loja online', title:'Nova encomenda ' + o.number,
-      intro:[(o.payment_method === 'loja' ? 'Reserva para pagar ao levantar.' : 'Pagamento recebido' + (o.paid_with && PAID_WITH[o.paid_with] ? ' por ' + PAID_WITH[o.paid_with] : '') + '.') + ' Abre o painel para tratar dela.'],
+      intro:[(o.payment_method === 'loja' ? 'Reserva para pagar ao levantar.' : o.payment_method === 'transferencia' ? 'O cliente vai pagar por MB WAY ou transferência, com a nota ' + o.number + '. Quando o dinheiro entrar, abre a encomenda no painel e carrega em Paga.' : 'Pagamento recebido' + (o.paid_with && PAID_WITH[o.paid_with] ? ' por ' + PAID_WITH[o.paid_with] : '') + '.') + ' Abre o painel para tratar dela.'],
       blocks:[{ items:o.items, o:o }, { rows:[['Cliente', o.name || '—'], ['Email', o.email || '—'], ['Telemóvel', phoneFmt(o.phone) || '—'], ['Entrega', deliveryText(o)]].concat(o.nif ? [['NIF', o.nif]] : []).concat(o.notes ? [['Notas', o.notes]] : []) }, { button:['Abrir o painel', c.siteUrl] }] }; },
     shop_return: function(r, c){ var n = (c.order||{}).number || ('#' + r.order_id); return { subject:'Pedido de devolução — ' + n, pre:(r.email||'') + ' · ' + (r.reason||''),
       eyebrow:'Loja online', title:'Novo pedido de devolução',
@@ -274,7 +286,7 @@
 
   function render(ev, rec, ctx){
     ctx = ctx || {};
-    var c = { siteUrl:String(ctx.siteUrl || '').replace(/\/$/, '') + '/', mb:ctx.mb, order:ctx.order, link:ctx.link };
+    var c = { siteUrl:String(ctx.siteUrl || '').replace(/\/$/, '') + '/', mb:ctx.mb, order:ctx.order, link:ctx.link, pay:ctx.pay };
     var m = T[ev.tpl](rec, c);
     var logo = ctx.logoUrl || (c.siteUrl + 'icon-192.png');
     var body = m.blocks.map(function(b){

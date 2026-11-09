@@ -69,26 +69,27 @@ export default async (req) => {
     const shipping = shippingFor(settings, method, subtotal);
     const total = Math.round((subtotal + shipping) * 100) / 100;
     const payInStore = body.payment === 'loja' && method === 'pickup';
+    const payTransfer = body.payment === 'transferencia';
     if (!payInStore && total < 0.5) return json(400, { error: 'O valor mínimo para pagamento online é 0,50 €.' });
 
     const status = payInStore ? 'pagar_na_loja' : 'por_pagar';
     const order = await insertOrder({
       user_id: user.id,
-      email: user.email,
-      name: clean(c.name || (user.user_metadata && user.user_metadata.name), 120),
+      email: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(c.email || '').trim()) ? clean(c.email, 200).toLowerCase() : user.email,
+      name: clean(c.name || (user.meta && user.meta.name) || user.name, 120),
       phone: clean(c.phone, 30),
       nif: clean(c.nif, 20),
       items, subtotal, shipping, total, delivery,
-      payment_method: payInStore ? 'loja' : 'online',
+      payment_method: payInStore ? 'loja' : payTransfer ? 'transferencia' : 'online',
       status,
       notes: clean(body.notes, 500),
       history: [{ status, at: new Date().toISOString() }],
     });
 
-    if (payInStore) {
+    if (payInStore || payTransfer) {
       // reserva logo o stock para não vender o mesmo equipamento duas vezes
       await applyStock(order).catch(() => {});
-      await notify('order', order.id).catch((e) => console.error('email', e.message)); // "Reserva confirmada" + aviso à loja
+      await notify('order', order.id).catch((e) => console.error('email', e.message)); // "Reserva confirmada" / dados para pagar + aviso à loja
       return json(200, { order: { id: order.id, number: order.number, status } });
     }
 

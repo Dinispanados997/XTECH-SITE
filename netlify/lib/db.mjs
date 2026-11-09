@@ -83,6 +83,23 @@ export async function applyStock(order) {
   await updateOrder(order.id, { stock_done: true });
 }
 
+// repõe o stock de uma encomenda cancelada (só se tinha sido descontado)
+export async function restoreStock(order) {
+  if (!order || !order.stock_done) return;
+  for (const [key, type] of [['devices', 'device'], ['accessories', 'accessory']]) {
+    const list = await kvGet(key);
+    if (!Array.isArray(list)) continue;
+    let changed = false;
+    for (const line of order.items || []) {
+      if (line.type !== type) continue;
+      const it = list.find((x) => Number(x.id) === Number(line.id));
+      if (it && it.qty != null && it.qty !== '' && !isNaN(Number(it.qty))) { it.qty = Number(it.qty) + (Number(line.qty) || 1); changed = true; }
+    }
+    if (changed) await kvSet(key, list);
+  }
+  await updateOrder(order.id, { stock_done: false });
+}
+
 // ---------------------------------------------------------------- funções SQL (claim_email, …)
 const RPC = {
   claim_email: (a) => one('select public.claim_email($1, $2, $3) as r', [a.p_table, a.p_id, a.p_key]).then((x) => x && x.r),
@@ -113,25 +130,5 @@ export async function unclaimQuote(row) {
   await q('update public.inbox set payload = $2::jsonb where id = $1', [Number(row.id), asJson(row.payload || {})]);
 }
 
-// ---------------------------------------------------------------- ferramentas do painel admin
-// Com base de dados: só a equipa pode usar. Sem base de dados (modo demonstração): aberto,
-// mas só a partir do próprio site e com limite de pedidos.
-const _hitsAdm = new Map();
+// endereço IP de quem fez o pedido (para limitar abusos)
 export const clientIp = (req) => (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'x').split(',')[0].trim();
-export async function guardaAdmin(req, { porMinuto = 30 } = {}) {
-  const ip = clientIp(req);
-  const now = Date.now();
-  const arr = (_hitsAdm.get(ip) || []).filter((t) => now - t < 60_000);
-  if (arr.length >= porMinuto) return json(429, { error: 'Demasiados pedidos. Espera um minuto.' });
-  arr.push(now); _hitsAdm.set(ip, arr);
-  const origin = req.headers.get('origin') || '';
-  const site = (process.env.SITE_URL || '').replace(/\/$/, '');
-  const self = new URL(req.url).origin;
-  if (origin && origin !== self && (!site || origin !== site)) return json(403, { error: 'Origem não permitida' });
-  if (!dbOn()) return null; // modo demonstração
-  const user = await getUser(req);
-  if (!user) return json(401, { error: 'Entra no painel admin primeiro.' });
-  if (!(await isStaffEmail(user.email))) return json(403, { error: 'Só a equipa pode usar isto.' });
-  return null;
-}
-export const supabaseLigado = dbOn; // nome antigo, usado em pecas.mjs

@@ -373,7 +373,7 @@ Sem esta chave, o resto do site funciona normalmente.
   - Pede ao teu contabilista ou jurista para rever.
 - **Livro de Reclamações Eletrónico:** confirma que a loja está registada em livroreclamacoes.pt. O link já está no rodapé do site.
 - **Garantia:** o site indica 18 meses nos equipamentos usados e 3 anos nos artigos novos, os prazos mínimos do Decreto-Lei n.º 84/2021 para vendas a consumidores. Não indiques prazos mais curtos.
-- **Morada e horário:** confirma que a morada (Largo Dom Gualdim Pais 21, Amares) e o horário que o assistente do chat indica (segunda a sexta 9h30–19h, sábado 10h–13h) estão certos.
+- **Morada e horário:** confirma que a morada (Rua da Igreja, n.º 81, 4720-492 Goães, Amares) e o horário que o assistente do chat indica (segunda a sexta 9h30–19h, sábado 10h–13h) estão certos.
 
 ## Lista final antes de abrir
 
