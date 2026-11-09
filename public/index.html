@@ -806,7 +806,7 @@ h1.admin-title{font-size:34px;}
   #site-view .hero p.sub{font-size:15px; margin-bottom:18px;}
   .fx-words{justify-content:flex-start; padding:14vh 0 0;}
   .fx-word{font-size:min(21vw, 16vh);}
-  .fx-front{top:86px; translate:-50% 0; height:clamp(220px, calc(100svh - 450px), 420px);}
+  .fx-front{top:86px; translate:-50% 0; height:var(--fxh, clamp(220px, calc(100svh - 450px), 420px));}
   .fx-pair{top:45%; height:min(70vh, 620px);}
   .fx-scrollhint{display:none;}
   #site-view .banners{padding:80px 20px 20px;}
@@ -3956,6 +3956,13 @@ async function sendChatMessage(){
     try{ phoneGL = createPhoneGL(scene.querySelector('.fx-gl')); }catch(e){ phoneGL = null; }
     if(phoneGL) scene.classList.add('fx-has-gl');
     const fitThickness = ()=>{
+      // telemóvel/tablet: o iPhone ocupa todo o espaço livre entre o topo e o texto
+      if(window.innerWidth <= 900 && textBlock){
+        const sr0 = scene.getBoundingClientRect(), tb = textBlock.getBoundingClientRect();
+        const avail = (tb.top - sr0.top) - 86 - 46;   // 46: folga + o texto ainda pode estar a entrar (desce até 24px)
+        const h = Math.max(220, Math.min(avail, window.innerHeight * .62, window.innerWidth * 1.6));
+        scene.style.setProperty('--fxh', Math.round(h) + 'px');
+      } else scene.style.removeProperty('--fxh');
       thickT = Math.max(14, front.offsetWidth * 0.118);                       // ~ proporção real do iPhone
       scene.style.setProperty('--T', thickT.toFixed(1) + 'px');
       // centro e tamanho do telemóvel sem transformação (para o WebGL usar a mesma perspetiva do CSS)
