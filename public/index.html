@@ -806,8 +806,8 @@ h1.admin-title{font-size:34px;}
   #site-view .hero p.sub{font-size:15px; margin-bottom:18px;}
   .fx-words{justify-content:flex-start; padding:14vh 0 0;}
   .fx-word{font-size:min(21vw, 16vh);}
-  .fx-front{top:86px; translate:-50% 0; height:clamp(200px, calc(100svh - 500px), 380px);}
-  .fx-pair{top:42%; height:min(60vh, 520px);}
+  .fx-front{top:86px; translate:-50% 0; height:clamp(220px, calc(100svh - 450px), 420px);}
+  .fx-pair{top:45%; height:min(70vh, 620px);}
   .fx-scrollhint{display:none;}
   #site-view .banners{padding:80px 20px 20px;}
   #site-view .banner{min-height:300px; padding:30px; border-radius:26px;}
@@ -4020,7 +4020,14 @@ async function sendChatMessage(){
     sceneSt.setProperty('--sol', sm(seg(18, 34,  ryFront)).toFixed(3));  // lateral esquerda
     sceneSt.setProperty('--fo', (k * (1 - sm(seg(.29, .335, p)))).toFixed(3));   // opacidade da frente
     const fo = k * (1 - sm(seg(.29, .335, p)));
-    const bz = buzz(t), tyPx = (1-k)*14*window.innerHeight/100, sc = lerp(1,.9,flip1), rxF = -smy*6;
+    let bz = buzz(t), tyPx = (1-k)*14*window.innerHeight/100, sc = lerp(1,.9,flip1), rxF = -smy*6;
+    // telemóvel: quando o texto do topo sai (logo ao começar a deslizar), o iPhone cresce até ~66% do ecrã e vai para o centro
+    if(vw <= 900 && phoneBox && phoneBox.h > 0){
+      const free = sm(seg(.09, .22, p));
+      const want = Math.max(1, Math.min(vh * .66, vw * 1.45) / phoneBox.h);
+      sc *= lerp(1, want, free);
+      tyPx += lerp(0, vh * .5 - phoneBox.cy, free);
+    }
     const bxPx = phoneBox ? bz.x/100*phoneBox.w : 0;
     front.style.transform = bodyEl.style.transform =
       `translateY(${tyPx.toFixed(2)}px) rotateY(${ryFront}deg) rotateX(${rxF}deg) scale(${sc}) translateX(${bxPx.toFixed(2)}px) rotateZ(${bz.r.toFixed(3)}deg)`;
