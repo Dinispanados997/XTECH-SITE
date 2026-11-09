@@ -1112,6 +1112,10 @@ h1.admin-title{font-size:34px;}
 .xp-rec-img{width:100%; aspect-ratio:1.25; display:flex; align-items:center; justify-content:center; margin-bottom:10px; border-radius:16px; overflow:hidden;}
 .xp-rec-img img{max-width:100%; max-height:100%; object-fit:contain;}
 .xp-rec-img .xp-rec-logo{width:34%;}
+.xp-rec-img:has(img[src*="-cor."]), .xp-rec-img:has(img[src*="-palco."]), .xp-rec-img:has(img[src*="accetel"]){aspect-ratio:1/1; padding:0 !important; background:#121212 !important;}
+.xp-rec-img img[src*="-cor."], .xp-rec-img img[src*="-palco."]{width:100%; height:100%; max-width:none; max-height:none; object-fit:cover;}
+.xp-rec-img:has(img[src*="accetel"]){background:#fff !important;}
+.xp-rec-img img[src*="accetel"]{width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; padding:6%; box-sizing:border-box;}
 .xp-rec-cols{display:flex; gap:6px; align-items:center; align-self:center; margin-bottom:12px;}
 .xp-rec-cols i{display:block; width:12px; height:12px; border-radius:50%; box-shadow:0 0 0 1px rgba(255,255,255,.25);}
 .xp-rec-cols em{font-style:normal; font-size:12px; color:var(--muted);}
@@ -1200,7 +1204,7 @@ h1.admin-title{font-size:34px;}
 #vitrine .vt-nav:hover{background:rgba(255,255,255,.14);transform:scale(1.06)}
 #vitrine .vt-prev{left:max(18px,calc(50% - 560px))}
 #vitrine .vt-next{right:max(18px,calc(50% - 560px))}
-#vitrine .vt-info{position:relative;z-index:5;text-align:center;margin-top:-24px;cursor:pointer}
+#vitrine .vt-info{position:relative;z-index:5;text-align:center;margin-top:-24px;cursor:default;pointer-events:none}
 #vitrine .vt-name{font-size:clamp(26px,3.4vw,40px);font-weight:800;letter-spacing:-.035em;color:#fff;text-transform:uppercase}
 #vitrine .vt-price{display:inline-block;margin-top:12px;padding:8px 22px;border-radius:999px;background:#fff;color:#000;font-weight:800;font-size:20px;letter-spacing:-.02em}
 #vitrine .vt-hint{margin-top:12px;font-size:12px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#5c5e64}
@@ -4986,7 +4990,7 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
           <button class="vt-nav vt-prev" aria-label="Anterior">‹</button>
           <button class="vt-nav vt-next" aria-label="Seguinte">›</button>
         </div>
-        <div class="vt-info"><div class="vt-name"></div><div class="vt-price"></div><div class="vt-hint">Clica para ver</div></div>
+        <div class="vt-info"><div class="vt-name"></div><div class="vt-price"></div></div>
         <div class="vt-spectrum"></div>`;
       if (host && host.parentNode) host.parentNode.insertBefore(sec, host.nextSibling);
       else (document.getElementById('vitrine-root') || document.body).appendChild(sec);
@@ -5051,11 +5055,8 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
         sec.querySelectorAll('.vt-item').forEach(el => { const r = el.getBoundingClientRect();
           if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom){
             const d = Math.abs(+el.dataset.i - cur); if (d < bestD){ bestD = d; best = el; } } });
-        if (best){ const i = +best.dataset.i, it = items[i];
-          if (it && it.type !== 'builtin' && typeof openProductDetail === 'function') openProductDetail(it.type, it.id);
-          else if (i === cur) openDetail(i); else toIndex(i); } }
+        if (best){ const i = +best.dataset.i; if (i !== cur) toIndex(i); openDetail(i); } }
     });
-    sec.addEventListener('click', e => { if (e.target.closest('.vt-info')) openDetail(cur); });
   }
 
   // ---------- ecrã de produto ----------
@@ -5151,6 +5152,8 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 .xp-visual > img{padding:14% 14% 22% !important;}
 .xp-rec-img{background:var(--stage) !important;}
 .xp-rec-img img{max-width:72% !important; max-height:76% !important;}
+.xp-rec-img img[src*="-cor."], .xp-rec-img img[src*="-palco."]{max-width:none !important; max-height:none !important; width:100% !important; height:100% !important; object-fit:cover !important;}
+.xp-rec-img img[src*="accetel"]{max-width:none !important; max-height:none !important; width:100% !important; height:100% !important;}
 .fx-ex-media > img{max-height:400px !important; border-radius:0 !important;}
 .pd-gallery-main img, .pd-thumb{object-fit:contain !important;}
 .photo-thumb{object-fit:contain !important; background:#111;}
