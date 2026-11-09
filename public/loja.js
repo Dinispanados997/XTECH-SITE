@@ -112,8 +112,16 @@
     return { lines, subtotal: Math.round(subtotal*100)/100, problems, count: cart.reduce((s,l)=>s+l.qty, 0) };
   }
 
+  const WA_SHOP = '351923512686';
+  function askWhatsapp(type, id){
+    const it = findItem(type, id); const name = it ? XPricing.itemName(it, type) : 'um produto';
+    const msg = `Olá! Vi no site o produto "${name}". Que modelos têm disponíveis?`;
+    try{ window.XStats && XStats.ev('click', { l:'Perguntar modelos no WhatsApp', i: type + ':' + id }); }catch(e){}
+    window.open(`https://wa.me/${WA_SHOP}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+  }
   function addToCart(type, id, opts, qty){
     const it = findItem(type, id); if(!it){ toast('Produto indisponível.'); return; }
+    if(XPricing.askOnly(it, type)){ askWhatsapp(type, id); return; }
     const st = stockOf(it); if(st != null && st <= 0){ toast('Este produto está esgotado.'); return; }
     opts = opts || {};
     const key = lineKey(type, id, opts);
@@ -121,6 +129,7 @@
     if(ex) ex.qty = Math.min((st == null ? 10 : st), ex.qty + (qty||1));
     else cart.push({ key, type, id: Number(id), opts, qty: qty||1 });
     saveCart();
+    try{ window.XStats && XStats.product('cart', type, id, it); }catch(e){}
     const b = $('.xs-cartbtn'); if(b){ b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
     openCart();
   }
@@ -195,16 +204,26 @@
       const m = (card.getAttribute('onclick')||'').match(/openProductDetail\('(\w+)',\s*(\d+)\)/); if(!m) return;
       const it = findItem(m[1], +m[2]); const btn = card.querySelector('.product-actions .btn'); if(!btn || !it) return;
       const st = stockOf(it);
+      if(XPricing.askOnly(it, m[1])){ btn.textContent = 'Perguntar'; btn.classList.add('xt-wa-btn'); const eta = card.querySelector('.xt-eta'); if(eta) eta.textContent = 'Modelos: pergunta no WhatsApp'; return; }
       if(st != null && st <= 0){ btn.textContent = 'Esgotado'; btn.disabled = true; btn.style.opacity = '.45'; }
     });
   }
   function decorateProductPage(type, id){
     const it = findItem(type, id); const st = stockOf(it);
+    // acessórios com foto: palco branco (as fotos dos fornecedores têm fundo branco)
+    const pdr = document.getElementById('product-detail-root');
+    if(pdr) pdr.classList.toggle('xp-acc', type === 'accessory' && !!(it && ((it.photos && it.photos.length) || it.photo)));
+    if(it && XPricing.askOnly(it, type)){
+      $$('#product-detail-root [data-act="order"]').forEach(b=>{ b.textContent = 'Perguntar modelos no WhatsApp'; b.classList.add('xt-wa-btn'); });
+      $$('#product-detail-root .xp-fine').forEach(p=> p.textContent = 'Temos vários modelos e vão mudando — manda-nos mensagem no WhatsApp a dizer o teu telemóvel e dizemos logo o que há. Levantas na oficina em Goães, Amares, ou enviamos.');
+      return;
+    }
     $$('#product-detail-root [data-act="order"]').forEach(b=>{
       if(st != null && st <= 0){ b.textContent = 'Esgotado'; b.disabled = true; b.style.opacity = '.45'; }
       else b.textContent = 'Adicionar ao carrinho';
     });
-    $$('#product-detail-root .xp-fine').forEach(p=> p.textContent = st != null && st > 0 && st <= 2 ? `Últimas ${st} unidade${st>1?'s':''}. ${ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão' : 'Paga por MB WAY ou transferência'}, ou paga ao levantar.` : (ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão, ou paga ao levantar na oficina em Goães, Amares.' : 'Paga por MB WAY ou transferência bancária, ou paga ao levantar na oficina em Goães, Amares.'));
+    const eta = type === 'accessory' && st == null ? 'Entrega em 24–48h. ' : '';
+    $$('#product-detail-root .xp-fine').forEach(p=> p.textContent = eta + (st != null && st > 0 && st <= 2 ? `Últimas ${st} unidade${st>1?'s':''}. ${ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão' : 'Paga por MB WAY ou transferência'}, ou paga ao levantar.` : (ONLINE ? 'Paga online com MB WAY, Multibanco ou cartão, ou paga ao levantar na oficina em Goães, Amares.' : 'Paga por MB WAY ou transferência bancária, ou paga ao levantar na oficina em Goães, Amares.')));
   }
 
   /* =====================================================================

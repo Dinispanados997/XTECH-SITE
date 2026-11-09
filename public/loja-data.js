@@ -25,11 +25,15 @@
         add('battery', item.battery ? `Saúde da bateria ${item.battery}%` : '', v.battery);
         add('storage', item.storage, v.storage);
       }
+      if(type !== 'device') add('model', item.model, v.model);
       add('color', item.color, v.color);
       return G;
     },
     itemName(item, type){ return type === 'device' ? `${item.brand||''} ${item.model||''}`.trim() : (item.name||''); },
+    ASK_CATS: ['Capas', 'Películas'],
+    askOnly(item, type){ return type !== 'device' && !!item && (item.ask === true || XPricing.ASK_CATS.includes(item.cat)); },
     priceFor(item, type, opts){
+      if(XPricing.askOnly(item, type)) throw new Error('Pergunta-nos no WhatsApp que modelos temos.');
       opts = opts || {}; let p = Number(item.price)||0; const chosen = [];
       for(const g of XPricing.optionGroups(item, type)){
         const want = opts[g.key]; let o = g.opts[g.def];
@@ -296,6 +300,8 @@
       try{ staffFlag = !!(await api('isStaff')); }catch(e){ staffFlag = false; }
       return staffFlag;
     },
+    stats: (days)=> api('stats', { days }),
+    live: (after)=> api('live', { after }),
     staff: {
       async add(email, name, role){ await api('staffAdd', { email, name, role }); },
       async remove(email){ await api('staffRemove', { email }); },
@@ -410,6 +416,8 @@
     },
     async isStaff(){ return true; },
     staff: { async add(){}, async remove(){} },
+    async stats(){ throw new Error('As estatísticas só funcionam no site publicado.'); },
+    async live(){ throw new Error('As estatísticas só funcionam no site publicado.'); },
     orders: {
       async create(body){
         if(body.retryOrderId){ const o = (await dlist('demo_orders')).find(x=>x.id===body.retryOrderId); return { order:{ id:o.id, number:o.number }, demoPay:true }; }

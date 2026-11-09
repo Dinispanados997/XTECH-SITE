@@ -251,3 +251,36 @@ begin
   execute format('update public.%I set emails = coalesce((select jsonb_agg(e) from jsonb_array_elements(emails) e where e->>''k'' <> $1), ''[]''::jsonb) where id = $2', p_table)
     using p_key, p_id;
 end $$;
+
+-- ---------- Estatísticas do site (anónimas: sem IP guardado, sem cookies) ----------
+-- (o servidor também cria isto sozinho na primeira visita — ver netlify/lib/stats.mjs)
+create table if not exists public.events (
+  id     bigint generated always as identity primary key,
+  at     timestamptz not null default now(),
+  vid    text not null,
+  sid    text,
+  kind   text not null,
+  page   text,
+  item   text,
+  label  text,
+  ref    text,
+  device text
+);
+create index if not exists events_at_idx on public.events (at);
+create index if not exists events_kind_at_idx on public.events (kind, at);
+-- uma linha por visita: último sinal (para "agora no site"), duração, de onde veio, se é a 1.ª vez
+create table if not exists public.visits (
+  sid     text primary key,
+  vid     text not null,
+  started timestamptz not null default now(),
+  last_at timestamptz not null default now(),
+  device  text,
+  ref     text,
+  is_new  boolean not null default false,
+  page    text,
+  item    text,
+  pages   int not null default 0,
+  events  int not null default 0
+);
+create index if not exists visits_started_idx on public.visits (started);
+create index if not exists visits_last_idx on public.visits (last_at);

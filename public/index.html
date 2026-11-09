@@ -312,6 +312,63 @@ p.admin-sub{color:var(--muted); margin:0 0 24px; font-size:14px;}
 .subtab.active{background:var(--surface-2); color:var(--text);}
 
 .empty-inline{text-align:center; padding:36px; color:var(--muted); font-size:13.5px;}
+.ai-bulk{display:flex; gap:14px; align-items:center; justify-content:space-between; background:var(--surface-2); border-radius:12px; padding:14px 16px; margin-bottom:12px; font-size:13.5px;}
+.ai-bulk span{display:block; color:var(--muted); font-size:12.5px; margin-top:3px;}
+@media (max-width:520px){ .ai-bulk{flex-direction:column; align-items:stretch;} }
+/* fotos de acessórios (fotos de fornecedor com fundo branco): moldura branca, a foto enche a moldura */
+
+.xt-wa-btn{background:#25D366 !important; color:#06240f !important; border-color:#25D366 !important;}
+.xt-eta{display:inline-block; font-size:11.5px; font-weight:600; color:var(--green); margin-top:6px;}
+/* estatísticas */
+.st-period{display:flex; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; flex-wrap:wrap;}
+.st-period button{background:none; border:0; color:var(--muted); font:inherit; font-size:12.5px; font-weight:600; padding:7px 11px; border-radius:9px; cursor:pointer;}
+.st-period button.on{background:var(--surface-2); color:var(--text);}
+.st-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px;}
+.st-grid-3{grid-template-columns:1fr 1fr 1fr;}
+.st-bar{margin-bottom:13px;}
+.st-bar-top{display:flex; justify-content:space-between; gap:10px; font-size:13.5px; margin-bottom:6px;}
+.st-bar-top span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.st-bar-top b{font-weight:700; white-space:nowrap;}
+.st-track{height:7px; background:var(--surface-2); border-radius:9px; overflow:hidden;}
+.st-track i{display:block; height:100%; background:var(--text); border-radius:9px; opacity:.85;}
+.st-chart{width:100%; height:170px; display:block;}
+.st-colbg{fill:var(--surface-2); opacity:.6;}
+.st-kpi-sub{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); min-height:16px;}
+.st-delta{font-weight:700; font-size:11.5px; padding:2px 7px; border-radius:20px; background:var(--surface-2); color:var(--muted);}
+.st-delta.up{color:var(--green); background:var(--green-dim);} .st-delta.down{color:var(--red); background:var(--red-dim);}
+.st-muted{color:var(--muted); font-size:12.5px;}
+.st-pulse{display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--muted-2); margin-right:9px; vertical-align:1px;}
+.st-pulse.on{background:var(--green); animation:stPulse 1.6s infinite;}
+@keyframes stPulse{0%{box-shadow:0 0 0 0 rgba(50,215,75,.6);}70%{box-shadow:0 0 0 9px rgba(50,215,75,0);}100%{box-shadow:0 0 0 0 rgba(50,215,75,0);}}
+@media (prefers-reduced-motion:reduce){ .st-pulse.on{animation:none;} }
+.st-now{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px;}
+.st-who{background:var(--surface-2); border-radius:12px; padding:12px 14px; font-size:13.5px;}
+.st-who small{display:block; color:var(--muted); font-size:11.5px; margin-top:5px;}
+.st-who-top{display:flex; gap:8px; align-items:center; margin-bottom:5px;}
+.st-tag{font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:20px; background:var(--green-dim); color:var(--green);}
+.st-tag.gray{background:var(--surface); color:var(--muted);}
+.st-live-panel .panel-head{flex-wrap:wrap; gap:6px;}
+.st-col{fill:var(--text); opacity:.85;} .st-col:hover{opacity:1; fill:var(--green);}
+.st-axis{display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-top:8px;}
+.st-note{color:var(--muted); font-size:12px; margin:6px 0 0;}
+.st-scroll{margin-bottom:16px;}
+.st-scroll-name{font-size:13.5px; font-weight:700; margin-bottom:8px;} .st-scroll-name small{color:var(--muted); font-weight:500; margin-left:6px;}
+.st-steps{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+.st-steps b{display:block; font-size:16px;} .st-steps span{display:block; color:var(--muted); font-size:11.5px; margin-bottom:5px;}
+.st-table{font-size:13.5px;}
+.st-tr{display:grid; grid-template-columns:1fr 70px 70px 80px; gap:10px; padding:10px 0; border-top:1px solid var(--border);}
+.st-tr span:not(:first-child){text-align:right; font-variant-numeric:tabular-nums;}
+.st-th{color:var(--muted); font-size:12px; font-weight:600; border-top:0; padding-top:0;}
+.st-feed{max-height:420px; overflow:auto; scrollbar-width:thin; scrollbar-color:var(--surface-2) transparent;}
+.st-ev{display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px solid var(--border); font-size:13.5px;}
+.st-ev:first-child{border-top:0;}
+.st-ev small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
+.st-dot{flex:0 0 8px; height:8px; border-radius:50%; background:var(--muted-2); margin-top:6px;}
+.st-dot.st-order,.st-dot.st-booking,.st-dot.st-quote{background:var(--green);}
+.st-dot.st-cart,.st-dot.st-checkout{background:#FF9F0A;}
+.st-dot.st-product{background:var(--text);}
+@media (max-width:900px){ .st-grid,.st-grid-3{grid-template-columns:1fr;} }
+@media (max-width:520px){ .st-tr{grid-template-columns:1fr 50px 54px 60px; gap:6px;} .st-steps{gap:6px;} }
 
 .admin-bottom-nav{position:fixed; bottom:0; left:0; right:0; background:rgba(11,12,14,0.96); backdrop-filter:blur(10px); border-top:1px solid var(--border); z-index:50;}
 .admin-bottom-inner{max-width:1180px; margin:0 auto; display:flex; justify-content:space-around; padding:12px 10px;}
@@ -333,6 +390,9 @@ p.admin-sub{color:var(--muted); margin:0 0 24px; font-size:14px;}
 .status-opt.selected{border-color:var(--text);}
 .status-opt.selected .dot{border-color:var(--text); background:var(--text);}
 .ai-scan-box{background:var(--red-dim); border:1px dashed var(--red); border-radius:12px; padding:14px; margin-bottom:18px; text-align:center;}
+.ai-actions{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px;}
+.ai-spin{display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; margin-right:8px; vertical-align:-2px; animation:aiSpin .8s linear infinite;}
+@keyframes aiSpin{to{transform:rotate(360deg);}}
 .ai-scan-box .photo-add{background:var(--red); color:#fff; border:none; width:100%; height:auto; flex-direction:row; padding:13px; border-radius:10px; font-size:13.5px; font-weight:700;}
 .price-suggest-box{background:var(--green-dim); border:1px solid var(--green); border-radius:12px; padding:16px; margin-top:14px;}
 .price-suggest-box .ps-title{font-weight:800; font-size:13.5px; color:var(--green); margin-bottom:6px;}
@@ -1011,6 +1071,9 @@ h1.admin-title{font-size:34px;}
 .xp-note svg{width:24px; height:24px; flex:0 0 auto;}
 .xp-opts{display:flex; flex-direction:column; gap:12px;}
 .xp-opts-grid{display:grid; grid-template-columns:1fr 1fr;}
+.xp-opts-models{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px;}
+.xp-opts-models .xp-o{padding:12px 14px; min-height:0; justify-content:center; text-align:center;}
+.xp-opts-models .xp-radio, .xp-opts-models .xp-oprice{display:none;}
 .xp-o{display:flex; align-items:center; gap:16px; width:100%; padding:18px 20px; border-radius:18px; border:0; background:transparent; box-shadow:inset 0 0 0 1px var(--border); color:#fff; text-align:left; cursor:pointer; font-family:var(--font); transition:box-shadow .2s, background .2s;}
 .xp-o:hover{box-shadow:inset 0 0 0 1px #5a5a5e;}
 .xp-o.on{box-shadow:inset 0 0 0 2px #fff; background:rgba(255,255,255,.05);}
@@ -1580,6 +1643,17 @@ html.vt-lock{overflow:hidden}
         <div class="panel"><div id="expenses-list"></div></div>
       </div>
 
+      <!-- ESTATÍSTICAS -->
+      <div class="admin-tab-content" id="tab-estatisticas">
+        <div class="panel-head" style="margin-bottom:6px;">
+          <div><h1 class="admin-title">Estatísticas</h1><p class="admin-sub" id="st-sub">Quem anda a visitar o site</p></div>
+          <div class="st-period" id="st-period">
+            <button data-d="1">Hoje</button><button data-d="7" class="on">7 dias</button><button data-d="30">30 dias</button><button data-d="90">90 dias</button><button data-d="365">1 ano</button>
+          </div>
+        </div>
+        <div id="st-body"><div class="empty-inline">A carregar…</div></div>
+      </div>
+
     </div>
   </div>
 
@@ -1593,6 +1667,7 @@ html.vt-lock{overflow:hidden}
       <div class="bnav-item" data-tab="equipa" onclick="switchAdminTab('equipa')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="9" r="2.6"/><path d="M15.5 14.2c2.6.4 4.5 2.6 4.5 5.3"/></svg>Equipa</div>
       <div class="bnav-item" data-tab="calendario" onclick="switchAdminTab('calendario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendário</div>
       <div class="bnav-item" data-tab="financeiro" onclick="switchAdminTab('financeiro')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financeiro</div>
+      <div class="bnav-item" data-tab="estatisticas" onclick="switchAdminTab('estatisticas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Estatísticas</div>
     </div>
   </div>
 </div>
@@ -1852,7 +1927,7 @@ function renderCatalog(){
   const grid = document.getElementById('products-grid');
   if(!grid) return;
   const phoneItems = devices.filter(d=> d.qty==null || d.qty==='' || Number(d.qty)>0).map(d=>({type:'device', id:d.id, name:`${d.brand} ${d.model} ${d.storage||''}`.trim(), cat:devCat(d), price:d.price, variants:d.variants, specs:[d.cond, d.battery?('Bateria '+d.battery+'%'):'', d.color].filter(Boolean), photo:(d.photos&&d.photos[0])||d.photo||''}));
-  const accItems = accessories.map(a=>({type:'accessory', id:a.id, name:a.name, cat:a.cat, price:a.price, variants:a.variants, desc:a.desc, photo:(a.photos&&a.photos[0])||a.photo||''}));
+  const accItems = accessories.map(a=>({type:'accessory', id:a.id, name:a.name, cat:a.cat, price:a.price, variants:a.variants, desc:a.desc, qty:a.qty, photo:(a.photos&&a.photos[0])||a.photo||''}));
   const all = [...phoneItems, ...accItems];
   let list = catalogFilter==='Todos' ? all : all.filter(i=>i.cat===catalogFilter);
   if(catalogSort==='asc') list = [...list].sort((a,b)=>a.price-b.price);
@@ -1860,15 +1935,15 @@ function renderCatalog(){
   const cnt = document.getElementById('catalog-count'); if(cnt) cnt.textContent = list.length + (list.length===1 ? ' artigo' : ' artigos');
   const card = item => `
     <div class="product-card${item.type==='accessory'?' is-acc':''}" onclick="openProductDetail('${item.type}',${item.id})" style="cursor:pointer;">
-      <div class="product-img">${item.photo ? `<img src="${item.photo}" alt="${item.name}" loading="lazy" style="width:100%; height:100%; object-fit:contain; padding:9%; box-sizing:border-box;">` : (item.type==='device' ? productSvg() : accessorySvg(item.cat))}</div>
+      <div class="product-img${item.photo && item.type==='accessory' ? ' acc-photo' : ''}">${item.photo ? `<img src="${item.photo}" alt="${item.name}" loading="lazy" style="width:100%; height:100%; object-fit:contain; padding:9%; box-sizing:border-box;">` : (item.type==='device' ? productSvg() : accessorySvg(item.cat))}</div>
       <div class="product-body">
         <div class="brand">${item.cat}</div>
         <h4>${item.name}</h4>
         <div class="cond">${item.specs ? item.specs.map(s=>`<span>${s}</span>`).join('') : (item.desc||'')}</div>
-        ${item.type==='device' ? `<div class="xt-warranty">Garantia de 18 meses</div>` : ''}
+        ${item.type==='device' ? `<div class="xt-warranty">Garantia de 18 meses</div>` : (item.qty==null || item.qty==='' ? `<div class="xt-eta">Entrega em 24–48h</div>` : '')}
         <div class="product-actions">
-          <div class="price">${item.variants && Object.values(item.variants).some(v=>v&&v.length) ? 'desde ' : ''}<b>${euro(item.price)}</b></div>
-          <button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); Shop.quickAdd('${item.type}',${item.id})">Adicionar</button>
+          <div class="price">${item.variants && Object.values(item.variants).some(v=>Array.isArray(v) && v.some(o=>Number(o&&o.delta)>0)) ? 'desde ' : ''}<b>${euro(item.price)}</b></div>
+          ${item.variants && item.variants.model && item.variants.model.length ? `<button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); openProductDetail('${item.type}',${item.id})">Escolher</button>` : `<button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); Shop.quickAdd('${item.type}',${item.id})">Adicionar</button>`}
         </div>
       </div>
     </div>`;
@@ -2089,9 +2164,186 @@ function switchAdminTab(tab){
   if(tab==='equipa') renderTeam();
   if(tab==='financeiro') renderExpenses();
   if(tab==='calendario') renderCalendar();
+  if(tab==='estatisticas') renderStats();
   window.scrollTo(0,0);
 }
 async function refreshAdmin(){ await loadAll(); }
+
+/* ================= estatísticas do site ================= */
+// "Agora no site" e a atividade atualizam de 5 em 5 s; os números do período de 30 em 30 s.
+let stDays = 7, stLiveTimer = null, stFullTimer = null, stBusy = false, stLiveBusy = false, stFeed = [], stLastId = 0, stData = null;
+const stEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const stN = n => Number(n||0).toLocaleString('pt-PT');
+const stPct = (a,b) => b ? Math.round(a*100/b) : 0;
+const stDur = s => { s = Math.max(0, Math.round(s||0)); if(s < 60) return s + ' s'; const m = Math.floor(s/60); if(m < 60) return m + ' min' + (s%60 && m < 10 ? ' ' + (s%60) + ' s' : ''); return Math.floor(m/60) + ' h ' + (m%60) + ' min'; };
+const ST_PAGES = { home:'Início', loja:'Loja', reparacoes:'Reparações', contacto:'Contacto', account:'Conta', checkout:'Checkout' };
+const ST_REF = { direto:'Direto', google:'Google', instagram:'Instagram', facebook:'Facebook', tiktok:'TikTok', bing:'Bing', olx:'OLX', whatsapp:'WhatsApp', vinted:'Vinted', youtube:'YouTube', chatgpt:'ChatGPT' };
+const ST_DEV = { telemovel:'Telemóvel', computador:'Computador', tablet:'Tablet' };
+const stRef = r => ST_REF[r] || r || 'Direto';
+const stPage = p => ST_PAGES[p] || p || '—';
+const stOpen = () => { const t = document.getElementById('tab-estatisticas'); return !!(t && t.style.display === 'block'); };
+document.addEventListener('click', e=>{
+  const b = e.target.closest('#st-period button'); if(!b) return;
+  stDays = Number(b.dataset.d);
+  document.querySelectorAll('#st-period button').forEach(x=>x.classList.toggle('on', x===b));
+  stLoadFull();
+});
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible' && stOpen()){ stLoadLive(); stLoadFull(); } });
+
+function stBars(rows){ // rows: [{label, value, sub}]
+  const max = Math.max(1, ...rows.map(r=>r.value));
+  return rows.map(r=>`<div class="st-bar"><div class="st-bar-top"><span>${r.label}</span><b>${r.sub!=null?r.sub:stN(r.value)}</b></div><div class="st-track"><i style="width:${Math.max(r.value?2:0, r.value*100/max)}%"></i></div></div>`).join('') || '<div class="empty-inline">Ainda sem dados.</div>';
+}
+function stColumns(vals, labels, tips){ // gráfico de colunas simples
+  const max = Math.max(1, ...vals);
+  const W = 700, H = 160, n = vals.length, gap = n > 60 ? 1 : 3, bw = (W - gap*(n-1)) / n;
+  const bars = vals.map((v,i)=>{ const h = Math.max(Math.round((v/max)*(H-14)), v?3:0); const x = i*(bw+gap);
+    return `<rect x="${x.toFixed(1)}" y="0" width="${bw.toFixed(1)}" height="${H}" rx="${Math.min(4,bw/3)}" class="st-colbg"/><rect x="${x.toFixed(1)}" y="${H-h}" width="${bw.toFixed(1)}" height="${h}" rx="${Math.min(4,bw/3)}" class="st-col"><title>${stEsc(tips[i])}</title></rect>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="st-chart" preserveAspectRatio="none">${bars}</svg>
+    <div class="st-axis">${labels.map(l=>`<span>${l}</span>`).join('')}</div>`;
+}
+function stDailyChart(daily, days){
+  const map = {}; daily.forEach(d=>map[d.d]=d);
+  const out = []; const today = new Date();
+  for(let i=days-1;i>=0;i--){ const d = new Date(today); d.setDate(d.getDate()-i); const k = d.toLocaleDateString('en-CA'); const r = map[k] || {}; out.push({ k, v: r.visitors||0, s: r.sessions||0, p: r.pageviews||0 }); }
+  const f = s=>{ const [y,m,d]=s.split('-'); return d+'/'+m; };
+  const max = Math.max(...out.map(o=>o.v));
+  return stColumns(out.map(o=>o.v), [f(out[0].k), 'máx. ' + stN(max) + ' pessoa(s) num dia', f(out[out.length-1].k)],
+    out.map(o=>`${f(o.k)}: ${o.v} pessoa(s), ${o.s} visita(s), ${o.p} página(s)`));
+}
+function stHoursChart(hours){
+  const v = Array(24).fill(0); hours.forEach(h=>{ v[h.h] = h.n; });
+  const top = Math.max(...v), best = v.indexOf(top);
+  return stColumns(v, ['00h', '06h', '12h', '18h', '23h'], v.map((n,h)=>`${String(h).padStart(2,'0')}h: ${n} visita(s)`))
+    + (top ? `<p class="st-note">Hora com mais visitas: <b>${String(best).padStart(2,'0')}h–${String((best+1)%24).padStart(2,'0')}h</b></p>` : '');
+}
+function stDelta(cur, prev, lowerIsBetter){
+  cur = Number(cur||0); prev = Number(prev||0);
+  if(!prev && !cur) return '';
+  if(!prev) return `<span class="st-delta up">▲ novo</span>`;
+  const d = Math.round((cur - prev) * 100 / prev);
+  if(d === 0) return `<span class="st-delta">= ${stDays===1?'ontem':'antes'}</span>`;
+  const good = lowerIsBetter ? d < 0 : d > 0;
+  return `<span class="st-delta ${good?'up':'down'}" title="${stDays===1?'Ontem até esta hora':'Período anterior'}: ${stN(prev)}">${d>0?'▲':'▼'} ${Math.abs(d)}%</span>`;
+}
+function stEventText(e){
+  return {
+    page: `Abriu <b>${stEsc(stPage(e.page))}</b>${e.ref && e.ref !== 'direto' ? ' · veio do ' + stEsc(stRef(e.ref)) : ''}`,
+    product: `Viu <b>${stEsc(e.label)}</b>`,
+    cart: `Pôs no carrinho <b>${stEsc(e.label)}</b>`,
+    checkout: `Foi para o <b>checkout</b>`,
+    order: `<b>Fez uma encomenda</b> ${stEsc(e.label)}`,
+    booking: `<b>Marcou uma reparação</b> ${stEsc(e.label)}`,
+    quote: `<b>Pediu um orçamento</b> ${stEsc(e.label)}`,
+    click: `Clicou em <b>${stEsc(e.label)}</b>`,
+  }[e.kind] || stEsc(e.kind);
+}
+const stWho = sid => 'Visitante ' + String(sid||'').slice(-4).toUpperCase();
+
+function stRenderLive(L){
+  const box = document.getElementById('st-live'); if(!box) return;
+  const now = L.now || [];
+  box.innerHTML = `
+    <div class="panel-head"><h3><span class="st-pulse${now.length?' on':''}"></span>Agora no site: ${now.length}</h3><span class="st-muted">Hoje: ${stN(L.today && L.today.visitors)} pessoa(s) · ${stN(L.today && L.today.sessions)} visita(s)</span></div>
+    ${now.length ? `<div class="st-now">${now.map(v=>`
+      <div class="st-who">
+        <div class="st-who-top"><b>${stWho(v.sid)}</b>${v.is_new ? '<span class="st-tag">1.ª vez</span>' : (v.before ? `<span class="st-tag gray">${v.before + 1}.ª visita</span>` : '')}</div>
+        <div>${v.item ? `A ver <b>${stEsc(v.item)}</b>` : `Está em <b>${stEsc(stPage(v.page))}</b>`}</div>
+        <small>${ST_DEV[v.device]||stEsc(v.device)} · veio do ${stEsc(stRef(v.ref))} · há ${stDur(v.secs)} · ${v.pages} página(s)</small>
+      </div>`).join('')}</div>` : '<div class="empty-inline" style="padding:18px;">Ninguém no site neste momento.</div>'}`;
+}
+function stRenderFeed(){
+  const el = document.getElementById('st-feed'); if(!el) return;
+  el.innerHTML = stFeed.map(e=>`<div class="st-ev"><span class="st-dot st-${e.kind}"></span><div>${stEventText(e)}<small>${stEsc(e.d)} ${stEsc(e.t)} · ${stWho(e.sid)} · ${ST_DEV[e.device]||stEsc(e.device||'')}</small></div></div>`).join('') || '<div class="empty-inline">Ainda sem atividade.</div>';
+}
+async function stLoadLive(){
+  if(stLiveBusy || !stOpen()) return; stLiveBusy = true;
+  try{
+    const L = await XDB.live(stLastId);
+    if(L.recent && L.recent.length){ stFeed = [...L.recent, ...stFeed].slice(0, 60); stLastId = Math.max(stLastId, ...L.recent.map(e=>e.id)); }
+    stRenderLive(L); stRenderFeed();
+  }catch(e){ const box = document.getElementById('st-live'); if(box && !box.innerHTML) box.innerHTML = `<div class="empty-inline">${stEsc(e.message)}</div>`; }
+  stLiveBusy = false;
+}
+async function stLoadFull(){
+  if(stBusy) return; stBusy = true;
+  const body = document.getElementById('st-body');
+  try{ stData = await XDB.stats(stDays); stRenderFull(stData); }
+  catch(e){ if(!stData) body.innerHTML = `<div class="empty-inline">${stEsc(e.message || 'Não foi possível carregar as estatísticas.')}</div>`; }
+  stBusy = false;
+}
+function renderStats(){
+  clearInterval(stLiveTimer); clearInterval(stFullTimer);
+  stLiveTimer = setInterval(()=>{ if(!stOpen()){ clearInterval(stLiveTimer); clearInterval(stFullTimer); return; } if(document.visibilityState==='visible') stLoadLive(); }, 5000);
+  stFullTimer = setInterval(()=>{ if(stOpen() && document.visibilityState==='visible') stLoadFull(); }, 30000);
+  stLoadFull().then(stLoadLive);
+}
+function stRenderFull(s){
+  const body = document.getElementById('st-body');
+  const T = s.totals, P = s.prev || {}, F = s.funnel;
+  document.getElementById('st-sub').textContent = (stDays===1 ? 'Hoje (comparado com ontem à mesma hora)' : 'Últimos ' + stDays + ' dias (comparado com os ' + stDays + ' dias antes)') + ' · a equipa não conta';
+  const ic = p => `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">${p}</svg>`;
+  const kpi = (t, v, p, delta, sub) => `<div class="kpi-card"><div class="top">${t} ${ic(p)}</div><div class="v">${v}</div><div class="st-kpi-sub">${delta||''}${sub ? '<span>' + sub + '</span>' : ''}</div></div>`;
+  const funnel = [
+    { label:'Entraram no site', value:F.visit },
+    { label:'Abriram um produto', value:F.product },
+    { label:'Puseram no carrinho', value:F.cart },
+    { label:'Foram para o checkout', value:F.checkout },
+    { label:'Fizeram encomenda', value:F.order },
+  ].map(r=>({ ...r, sub: stN(r.value) + ' · ' + stPct(r.value, F.visit) + '%' }));
+  const scroll = s.scroll.filter(r=>r.seen).map(r=>`
+    <div class="st-scroll"><div class="st-scroll-name">${stEsc(stPage(r.page))} <small>${stN(r.seen)} visita(s)</small></div>
+      <div class="st-steps">${[['25%',r.s25],['metade',r.s50],['75%',r.s75],['até ao fim',r.s100]].map(([l,v])=>`<div><b>${stPct(v,r.seen)}%</b><span>${l}</span><div class="st-track"><i style="width:${stPct(v,r.seen)}%"></i></div></div>`).join('')}</div></div>`).join('')
+    || '<div class="empty-inline">Ainda sem dados.</div>';
+  const products = s.products.length ? `<div class="st-table"><div class="st-tr st-th"><span>Produto</span><span>Vistas</span><span>Pessoas</span><span>Carrinho</span></div>${
+    s.products.map(p=>`<div class="st-tr"><span>${stEsc(p.label || p.item)}</span><span>${stN(p.views)}</span><span>${stN(p.people)}</span><span>${stN(p.carts)}</span></div>`).join('')}</div>` : '<div class="empty-inline">Ainda ninguém abriu produtos neste período.</div>';
+  const devTot = s.devices.reduce((a,d)=>a+d.n,0);
+  const ret = Math.max(0, T.visitors - T.new_visitors);
+  const conv = stPct(F.order, F.visit);
+  const feedPanel = `<div class="panel"><div class="panel-head"><h3>O que está a acontecer</h3></div><div class="st-feed" id="st-feed-slot"></div></div>`;
+  // o bloco "agora no site" e a atividade atualizam sozinhos: guardam-se e volta-se a pô-los no sítio
+  const keepLive = document.getElementById('st-live'), keepFeed = document.getElementById('st-feed');
+  body.innerHTML = `
+    <div class="panel st-live-panel" id="st-live-slot"></div>
+    <div class="kpi-grid">
+      ${kpi('Pessoas', stN(T.visitors), '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>', stDelta(T.visitors, P.visitors), stN(T.new_visitors) + ' pela 1.ª vez')}
+      ${kpi('Visitas', stN(T.sessions), '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>', stDelta(T.sessions, P.sessions))}
+      ${kpi('Páginas vistas', stN(T.pageviews), '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>', stDelta(T.pageviews, P.pageviews), T.sessions ? (T.pageviews/T.sessions).toFixed(1).replace('.',',') + ' por visita' : '')}
+      ${kpi('Tempo médio', stDur(T.avg_secs), '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', stDelta(T.avg_secs, P.avg_secs), T.sessions ? stPct(T.bounces, T.sessions) + '% saíram logo' : '')}
+      ${kpi('Produtos abertos', stN(T.product_views), '<path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/>', stDelta(T.product_views, P.product_views))}
+      ${kpi('Postos no carrinho', stN(T.carts), '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2l2.3 12h11l2-8H6"/>', stDelta(T.carts, P.carts))}
+      ${kpi('Encomendas', stN(T.orders), '<path d="M20 6 9 17l-5-5"/>', stDelta(T.orders, P.orders), conv ? conv + '% das visitas' : '')}
+      ${kpi('Marcações / orçamentos', stN(T.bookings) + ' / ' + stN(T.quotes), '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>', stDelta(T.bookings + T.quotes, (P.bookings||0) + (P.quotes||0)))}
+    </div>
+    <div class="st-grid">
+      ${stDays > 1
+        ? `<div class="panel"><div class="panel-head"><h3>Pessoas por dia</h3></div>${stDailyChart(s.daily, stDays)}</div>
+           <div class="panel"><div class="panel-head"><h3>A que horas vêm</h3></div>${stHoursChart(s.hours)}</div>`
+        : `<div class="panel"><div class="panel-head"><h3>Visitas por hora</h3></div>${stHoursChart(s.hours)}</div>${feedPanel}`}
+    </div>
+    <div class="st-grid">
+      <div class="panel"><div class="panel-head"><h3>Do site à encomenda</h3></div>${stBars(funnel)}<p class="st-note">Percentagem das visitas que chegaram a cada passo.</p></div>
+      <div class="panel"><div class="panel-head"><h3>Até onde fazem scroll</h3></div>${scroll}<p class="st-note">De quem abriu a página, quantos desceram até 25%, metade, 75% e até ao fundo.</p></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h3>Produtos mais vistos</h3></div>${products}</div>
+    <div class="st-grid st-grid-3">
+      <div class="panel"><div class="panel-head"><h3>De onde vêm</h3></div>${stBars(s.sources.map(r=>({ label:stEsc(stRef(r.ref)), value:r.n, sub: stN(r.n) + ' · ' + stPct(r.n, T.sessions) + '%' })))}</div>
+      <div class="panel"><div class="panel-head"><h3>Páginas</h3></div>${stBars(s.pages.map(p=>({ label:stEsc(stPage(p.page)), value:p.views })))}</div>
+      <div class="panel"><div class="panel-head"><h3>Quem são</h3></div>${T.visitors ? stBars([
+          ...s.devices.map(d=>({ label:ST_DEV[d.device]||stEsc(d.device), value:d.n, sub: stPct(d.n,devTot)+'%' })),
+          { label:'Primeira vez no site', value:T.new_visitors, sub: stPct(T.new_visitors, T.visitors) + '%' },
+          { label:'Já tinham vindo antes', value:ret, sub: stPct(ret, T.visitors) + '%' },
+        ]) : '<div class="empty-inline">Ainda sem dados.</div>'}</div>
+    </div>
+    <div class="st-grid">
+      <div class="panel"><div class="panel-head"><h3>Cliques</h3></div>${stBars(s.clicks.map(c=>({ label:stEsc(c.label), value:c.n, sub: stN(c.n) + (c.people!==c.n ? ' · ' + stN(c.people) + ' pessoa(s)' : '') })))}</div>
+      ${stDays > 1 ? feedPanel : ''}
+    </div>`;
+  const ls = document.getElementById('st-live-slot');
+  if(keepLive){ ls.replaceWith(keepLive); } else { ls.id = 'st-live'; }
+  const fs = document.getElementById('st-feed-slot');
+  if(keepFeed){ fs.replaceWith(keepFeed); } else { fs.id = 'st-feed'; stRenderFeed(); }
+}
 
 /* ================= DASHBOARD ================= */
 let currentRange = 'mes';
@@ -2194,10 +2446,11 @@ function renderStock(){
     `).join('') : `<div class="empty-inline">Sem dispositivos em stock.</div>`;
   } else if(stockTab==='accessories'){
     let list = accessories.filter(a => !q || (a.name+' '+a.cat).toLowerCase().includes(q));
-    panel.innerHTML = list.length ? list.map(a=>`
+    const noPhoto = accessories.filter(a=> !(a.photos && a.photos.length) && !a.photo).length;
+    panel.innerHTML = (noPhoto ? `<div class="ai-bulk"><div><b>${noPhoto} produto(s) sem foto</b><span id="ai-bulk-status">A IA cria uma foto de loja para cada um, a partir do nome (≈ 4 cêntimos por foto).</span></div><button class="btn btn-sm" style="background:#fff; color:#000;" onclick="aiBulkPhotos()">Criar fotos com IA</button></div>` : '') + (list.length ? list.map(a=>`
       <div class="list-row" onclick="openStockModal(${a.id})"><div style="display:flex; align-items:center; gap:12px;">${a.photo?`<img src="${a.photo}" style="width:44px; height:44px; border-radius:8px; object-fit:cover; flex-shrink:0;">`:''}<div><div class="lr-name">${a.name}</div><div class="lr-sub">${a.cat}${a.desc?' · '+a.desc:''}</div></div></div>
-      <div class="lr-right" style="display:flex; align-items:center; gap:14px;"><div><div class="lr-price">${euro(a.price)}</div><div class="lr-sub">Stock: ${a.qty ?? '—'}</div></div><button class="btn btn-sm btn-dark" onclick="event.stopPropagation(); deleteAccessory(${a.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></div>
-    `).join('') : `<div class="empty-inline">Sem acessórios em stock.</div>`;
+      <div class="lr-right" style="display:flex; align-items:center; gap:14px;"><div><div class="lr-price">${euro(a.price)}</div><div class="lr-sub">${a.qty==null || a.qty==='' ? 'Por encomenda' : 'Stock: ' + a.qty}</div></div><button class="btn btn-sm btn-dark" onclick="event.stopPropagation(); deleteAccessory(${a.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></div>
+    `).join('') : `<div class="empty-inline">Sem acessórios em stock.</div>`);
   } else {
     let list = parts.filter(p => !q || (p.name+' '+p.sku+' '+p.cat).toLowerCase().includes(q));
     panel.innerHTML = list.length ? list.map(p=>{
@@ -2228,7 +2481,7 @@ function openStockModal(editId){
       <div class="modal-head"><h3>${titles[t]}</h3><button class="modal-close" onclick="closeModal()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
       ${t!=='parts' ? `
       <div class="ai-scan-box">
-        <label class="photo-add" style="width:100%; justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg> Analisar foto com IA (identifica o produto)<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="analyzeProductPhoto(event, '${t}')"></label>
+        <label class="photo-add" style="width:100%; justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg> ${t==='accessories' ? 'Tirar foto — a IA cria a foto de loja e preenche tudo' : 'Analisar foto com IA (identifica o produto)'}<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="analyzeProductPhoto(event, '${t}')"></label>
         <div id="ai-scan-status" style="font-size:12.5px; color:var(--muted); margin-top:8px; min-height:16px;"></div>
       </div>
       <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:7px; font-weight:700;">FOTOS DO PRODUTO <span style="font-weight:400; color:var(--muted-2); text-transform:none;">— até ${STOCK_MAX_PHOTOS}, aparecem no anúncio da loja</span></label>
@@ -2263,7 +2516,7 @@ function openStockModal(editId){
           <div class="field"><label>CATEGORIA</label><select id="sa-cat">${accessoryCats.map(c=>`<option ${editing?.cat===c?'selected':''}>${c}</option>`).join('')}</select></div>
           <div class="field"><label>PREÇO (€)</label><input id="sa-price" type="number" step="0.01" placeholder="9.90" value="${editing?.price??''}"></div>
         </div>
-        <div class="field"><label>STOCK</label><input id="sa-qty" type="number" placeholder="10" value="${editing?.qty??''}"></div>
+        <div class="field"><label>STOCK <span style="font-weight:400; color:var(--muted-2); text-transform:none;">— vazio = por encomenda (o site mostra "Entrega em 24–48h")</span></label><input id="sa-qty" type="number" placeholder="Vazio = por encomenda" value="${editing?.qty??''}"></div>
         <div class="field"><label>DESCRIÇÃO</label><input id="sa-desc" placeholder="Ex: Vários modelos e cores" value="${editing?.desc||''}"></div>
         ${stockAiDescBlock()}
         <button class="btn btn-red btn-block" onclick="saveNewAccessory()">${editing?'Guardar alterações':'Guardar'}</button>
@@ -2354,6 +2607,7 @@ function deleteStockPhoto(idx){
 async function analyzeProductPhoto(e, mode){
   const file = e.target.files[0];
   if(!file) return;
+  if(mode==='accessories'){ e.target.value = ''; return aiAccessoryPhoto(file); }
   const statusEl = document.getElementById('ai-scan-status');
   statusEl.textContent = 'A analisar imagem com IA...';
   const reader = new FileReader();
@@ -2408,6 +2662,110 @@ async function analyzeProductPhoto(e, mode){
   };
   reader.readAsDataURL(file);
 }
+/* ---------- fotos com IA para todos os acessórios sem foto (a partir do nome) ---------- */
+let _aiBulkRun = false;
+async function aiBulkPhotos(){
+  if(_aiBulkRun) return;
+  const todo = accessories.filter(a=> !(a.photos && a.photos.length) && !a.photo);
+  if(!todo.length){ toast('Todos os produtos já têm foto.'); return; }
+  if(!confirm(`Criar ${todo.length} foto(s) com IA? Custa cerca de ${(todo.length*0.04).toFixed(2).replace('.',',')} € na conta Google e demora uns 20 segundos por foto. Podes continuar a usar o painel.`)) return;
+  _aiBulkRun = true; let ok = 0, fail = 0, lastErr = '';
+  const st = t => { const el = document.getElementById('ai-bulk-status'); if(el) el.innerHTML = t; };
+  for(const a of todo){
+    st(aiSpin(`A criar foto ${ok+fail+1} de ${todo.length}: ${stEscAi(a.name)}…`));
+    try{
+      const what = [a.name, a.cat, a.desc].filter(Boolean).join(' — ');
+      const d = await aiCall({ text: what });
+      if(!d.image) throw new Error('sem imagem');
+      const cur = accessories.find(x=>x.id===a.id); if(!cur) continue;
+      cur.photos = [d.image]; cur.photo = d.image;
+      await saveAccessories();               // a foto vai para o Vercel Blob e fica só o link
+      ok++;
+      if(stockTab==='accessories' && document.getElementById('tab-stock').style.display==='block') renderStock();
+    }catch(err){
+      fail++; lastErr = err.message;
+      if(err.code === 'nokey' || /faturação|chave|modelo de IA/i.test(err.message)) break;   // não vale a pena continuar
+    }
+  }
+  _aiBulkRun = false;
+  renderStock(); try{ renderCatalog(); }catch(e){}
+  toast(`Fotos criadas: ${ok}.` + (fail ? ` Falharam: ${fail}. ${lastErr}` : ''));
+  if(fail) st('⚠ ' + stEscAi(lastErr));
+}
+
+/* ---------- acessórios: foto tirada → foto de loja criada por IA + dados preenchidos ---------- */
+let _aiOrig = null, _aiGen = null, _aiBusy = false;
+function aiShrink(file, max){
+  return new Promise((ok, no)=>{
+    const url = URL.createObjectURL(file); const im = new Image();
+    im.onload = ()=>{ const k = Math.min(1, max / Math.max(im.width, im.height)); const c = document.createElement('canvas');
+      c.width = Math.round(im.width*k); c.height = Math.round(im.height*k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.86)); };
+    im.onerror = ()=>{ URL.revokeObjectURL(url); no(new Error('Não consegui ler a foto.')); };
+    im.src = url;
+  });
+}
+function aiStatus(html){ const el = document.getElementById('ai-scan-status'); if(el) el.innerHTML = html; }
+function aiSetPhoto(dataUrl){
+  // a foto da IA (ou a original) fica sempre em primeiro lugar
+  _stockPhotos = _stockPhotos.filter(p=> p !== _aiOrig && p !== _aiGen);
+  _stockPhotos.unshift(dataUrl);
+  if(_stockPhotos.length > STOCK_MAX_PHOTOS) _stockPhotos.length = STOCK_MAX_PHOTOS;
+  renderStockPhotoRow();
+}
+function aiFill(f){
+  if(!f) return;
+  const set = (id, v, onlyEmpty)=>{ const el = document.getElementById(id); if(el && v != null && v !== '' && (!onlyEmpty || !el.value)) el.value = v; };
+  set('sa-name', f.name);
+  const cat = document.getElementById('sa-cat'); if(cat && f.category && [...cat.options].some(o=>o.value===f.category)) cat.value = f.category;
+  set('sa-price', f.price != null ? Number(f.price).toFixed(2) : null, true);
+  set('sa-desc', f.desc || [f.compatible, f.color].filter(Boolean).join(' · '));
+  set('stock-ai-desc', f.longDesc);
+}
+async function aiCall(body){
+  const r = await fetch('/api/ai-photo', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+  const d = await r.json().catch(()=>({ error:'Resposta inválida do servidor.' }));
+  if(!r.ok) throw Object.assign(new Error(d.error || ('Erro ' + r.status)), { code: d.code });
+  return d;
+}
+const aiSpin = t => `<span class="ai-spin"></span>${t}`;
+async function aiAccessoryPhoto(file){
+  if(_aiBusy) return; _aiBusy = true;
+  try{
+    _aiOrig = await aiShrink(file, 1280); _aiGen = null;
+    aiSetPhoto(_aiOrig);
+    aiStatus(aiSpin('A criar a foto de loja e a ler o produto com IA… (uns 15–30 segundos)'));
+    const hints = accessories.filter(a=>a.price).slice(-60).map(a=>({ name:a.name, cat:a.cat, price:a.price }));
+    const cats = [...document.querySelectorAll('#sa-cat option')].map(o=>o.value);
+    const d = await aiCall({ image:_aiOrig, hints, cats });
+    if(!document.getElementById('sa-name')) return;   // fechou a janela entretanto
+    aiFill(d.fields);
+    if(d.image){ _aiGen = d.image; aiSetPhoto(_aiGen); }
+    const low = d.fields && d.fields.confidence === 'baixa';
+    aiStatus(
+      (d.image ? '✓ Foto criada pela IA (é a 1.ª foto do anúncio). ' : '⚠ ' + stEscAi(d.imageError || 'Não foi possível criar a foto.') + ' Ficou a tua foto original. ')
+      + (d.fields ? (low ? '⚠ A IA não tem a certeza do modelo — confirma o nome. ' : '✓ Dados preenchidos — confirma o preço antes de guardar. ') : '⚠ ' + stEscAi(d.fieldsError || 'Não foi possível ler os dados.') + ' ')
+      + `<div class="ai-actions">${d.image ? `<button type="button" class="btn btn-dark btn-sm" onclick="aiRedo()">Gerar outra foto</button><button type="button" class="btn btn-dark btn-sm" onclick="aiUseOriginal()">Usar a minha foto</button>` : `<button type="button" class="btn btn-dark btn-sm" onclick="aiRedo()">Tentar outra vez</button>`}</div>`);
+  }catch(err){
+    aiStatus('⚠ ' + stEscAi(err.message) + (err.code === 'nokey' ? '' : ' Ficou a tua foto original; preenche os dados à mão.'));
+  }finally{ _aiBusy = false; }
+}
+async function aiRedo(){
+  if(_aiBusy || !_aiOrig) return; _aiBusy = true;
+  aiStatus(aiSpin('A criar outra foto com IA…'));
+  try{
+    const d = await aiCall({ image:_aiOrig, noFields:true });
+    if(d.image){ _aiGen = d.image; aiSetPhoto(_aiGen); aiStatus('✓ Nova foto criada. <div class="ai-actions"><button type="button" class="btn btn-dark btn-sm" onclick="aiRedo()">Gerar outra foto</button><button type="button" class="btn btn-dark btn-sm" onclick="aiUseOriginal()">Usar a minha foto</button></div>'); }
+    else aiStatus('⚠ ' + stEscAi(d.imageError || 'A IA não devolveu imagem.') + ' <div class="ai-actions"><button type="button" class="btn btn-dark btn-sm" onclick="aiRedo()">Tentar outra vez</button></div>');
+  }catch(err){ aiStatus('⚠ ' + stEscAi(err.message)); }
+  finally{ _aiBusy = false; }
+}
+function aiUseOriginal(){
+  if(!_aiOrig) return;
+  aiSetPhoto(_aiOrig); _stockPhotos = _stockPhotos.filter(p=> p !== _aiGen); _aiGen = null; renderStockPhotoRow();
+  aiStatus('Ficou a tua foto original. <div class="ai-actions"><button type="button" class="btn btn-dark btn-sm" onclick="aiRedo()">Gerar foto com IA</button></div>');
+}
+const stEscAi = s => String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function saveNewDevice(){
   const brand = document.getElementById('sd-brand').value.trim();
   const model = document.getElementById('sd-model').value.trim();
@@ -2426,7 +2784,7 @@ async function saveNewAccessory(){
   const name = document.getElementById('sa-name').value.trim();
   if(!name){ toast('Indica o nome do produto.'); return; }
   const aiDesc = (document.getElementById('stock-ai-desc')?.value||'').trim();
-  const data = {name, cat:document.getElementById('sa-cat').value, price:Number(document.getElementById('sa-price').value)||0, qty:Number(document.getElementById('sa-qty').value)||0, desc:document.getElementById('sa-desc').value.trim(), photo:_stockPhotos[0]||'', photos:_stockPhotos.slice(0,STOCK_MAX_PHOTOS), aiDesc};
+  const data = {name, cat:document.getElementById('sa-cat').value, price:Number(document.getElementById('sa-price').value)||0, qty:(v=> v==='' ? null : Number(v)||0)(document.getElementById('sa-qty').value.trim()), desc:document.getElementById('sa-desc').value.trim(), photo:_stockPhotos[0]||'', photos:_stockPhotos.slice(0,STOCK_MAX_PHOTOS), aiDesc};
   if(_stockEditId!=null){
     const idx = accessories.findIndex(a=>a.id===_stockEditId);
     if(idx>-1) accessories[idx] = {...accessories[idx], ...data};
@@ -4229,6 +4587,7 @@ async function sendChatMessage(){
       add('battery', 'Seleciona uma opção de bateria', item.battery ? `Saúde da bateria ${item.battery}%` : '', v.battery, 'bateria');
       add('storage', 'Seleciona o armazenamento', item.storage, v.storage, 'memoria');
     }
+    if(type !== 'device') add('model', 'Seleciona o modelo do teu telemóvel', item.model, v.model, 'ecra');
     add('color', 'Seleciona a cor', item.color, v.color, 'cor');
     return G;
   }
@@ -4303,7 +4662,7 @@ async function sendChatMessage(){
           <div class="xp-optside">
             <h2>${g.title}</h2>
             ${g.key==='cond' && isRecond ? `<div class="xp-note">${icon('garantia')}<span>Todos os recondicionados são verificados pela nossa equipa e têm 18 meses de garantia.</span></div>` : ''}
-            <div class="xp-opts ${g.key==='color'?'xp-opts-grid':''}" role="radiogroup" aria-label="${g.title}">
+            <div class="xp-opts ${g.key==='color'?'xp-opts-grid':g.key==='model'?'xp-opts-models':''}" role="radiogroup" aria-label="${g.title}">
               ${g.opts.map((o,i)=>`<button type="button" class="xp-o" role="radio" aria-checked="${i===(g.def||0)}" data-g="${g.key}" data-i="${i}">
                 <span class="xp-radio">${g.key==='color' ? `<i style="background:${swatch(o.name)}"></i>` : ''}</span>
                 <span class="xp-oname"><b>${esc(o.name)}</b>${o.sub?`<small>${esc(o.sub)}</small>`:''}</span>
@@ -4535,6 +4894,7 @@ async function sendChatMessage(){
 <script src="loja.js"></script>
 <script src="agenda.js"></script>
 <script src="assistente.js"></script>
+<script src="stats.js"></script>
 <script id="vitrine-produtos">
 window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories com foto e qty > 0) */
 </script>
@@ -4720,6 +5080,7 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
   function closeDetail(){ const d = document.getElementById('vt-detail'); if (!d) return; d.classList.remove('open'); detailOpen = false; document.documentElement.classList.remove('vt-lock'); }
   function showDetail(i, dir){
     if (!items.length) return; i = (i + items.length) % items.length; dIdx = i; const it = items[i]; const d = ensureDetail();
+    try{ if (it.type !== 'builtin' && window.XStats) XStats.product('product', it.type, it.id, null, it.name); }catch(e){}
     const p = $('.vd-prod', d), left = $('.vd-left', d);
     p.classList.remove('in'); left.classList.remove('in'); p.style.setProperty('--dir', dir || 0);
     void p.offsetWidth;
@@ -4764,6 +5125,10 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 .xs-thumb img{object-fit:contain !important; padding:9%; box-sizing:border-box;}
 .xs-thumb img.logo{padding:0;}
 .xp-main{background:var(--stage) !important; aspect-ratio:1/1 !important;}
+#product-detail-root.xp-acc .xp-main{background:#fff !important;}
+#product-detail-root.xp-acc .xp-main img{width:94%; height:94%; max-width:94%; max-height:94%; object-fit:contain;}
+#product-detail-root.xp-acc .xp-th{background:#fff !important;}
+#product-detail-root.xp-acc .xp-th img{object-fit:contain !important; padding:6% !important; box-sizing:border-box;}
 .xp-main img{max-width:74% !important; max-height:74% !important; object-fit:contain !important;}
 .xp-th{background:var(--stage) !important;}
 .xp-th img{object-fit:contain !important; padding:12%; box-sizing:border-box;}
@@ -4920,12 +5285,21 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
 #page-loja .product-card.is-acc{flex-direction:row; align-items:stretch;}
 #page-loja .is-acc .product-img{aspect-ratio:auto !important; width:96px; flex:0 0 96px; border-bottom:0; border-right:1px solid var(--line);}
 #page-loja .is-acc .product-img svg{width:40%;}
+/* acessório com foto (fotos de fornecedor com fundo branco): quadrado branco, a foto enche-o */
+#page-loja .is-acc .product-img.acc-photo{background:#fff !important; aspect-ratio:1/1 !important; width:112px; flex:0 0 112px; align-self:center; margin:12px 0 12px 12px; border-radius:12px; border-right:0; overflow:hidden;}
+#page-loja .is-acc .product-img.acc-photo img{padding:4% !important; object-fit:contain !important;}
+#page-loja .product-card:not(.is-acc) .product-img.acc-photo{background:#fff !important;}
 #page-loja .is-acc .product-body{padding:12px 14px; min-width:0;}
 #page-loja .is-acc .product-body h4{font-size:15px !important; margin-bottom:2px;}
 #page-loja .is-acc .product-body .cond{font-size:12.5px; margin-bottom:6px;}
 #page-loja .is-acc .product-actions{padding-top:4px;}
 #page-loja .is-acc .product-body .price b{font-size:16px;}
 #page-loja .is-acc .product-actions .btn{padding:6px 11px; min-height:32px; font-size:13px;}
+/* cartões de acessórios estreitos (computador, 4 por linha): o preço e o botão passam para duas linhas em vez de cortar */
+#page-loja .is-acc .product-actions{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; min-width:0;}
+#page-loja .is-acc .product-actions .price{white-space:nowrap;}
+#page-loja .is-acc .product-actions .btn{flex:1 0 auto; max-width:100%; text-align:center; white-space:nowrap;}
+@media (min-width:641px){ #page-loja .is-acc .product-img.acc-photo{width:96px; flex-basis:96px;} #page-loja .is-acc .product-actions .btn{flex-basis:100%;} }
 
 @media (max-width:640px){
   .xt-shop-facts{flex-direction:column;}
@@ -4940,6 +5314,7 @@ window.VITRINE_BUILTIN=[]; /* a vitrine mostra o stock real (devices/accessories
   #page-loja .product-actions .btn{min-height:40px;}
   #page-loja .product-card.is-acc{grid-column:1/-1;}
   #page-loja .is-acc .product-img{width:80px; flex-basis:80px;}
+  #page-loja .is-acc .product-img.acc-photo{width:92px; flex-basis:92px; margin:10px 0 10px 10px;}
   #page-loja .is-acc .product-body{padding:10px 12px !important;}
   #page-loja .is-acc .product-body .cond{margin-bottom:2px;}
   #page-loja .is-acc .product-actions{flex-direction:row !important; align-items:center !important;}

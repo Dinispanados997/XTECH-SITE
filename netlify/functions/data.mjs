@@ -8,6 +8,7 @@
 import { q, one, asJson, dbOn } from '../lib/sql.mjs';
 import { getAuth } from '../lib/auth.mjs';
 import { json, getUser, isStaffEmail, kvSet, insertRow, updateRow, getRow, clientIp, restoreStock } from '../lib/db.mjs';
+import { track, stats, live } from '../lib/stats.mjs';
 
 const PUBLIC_KV = ['devices', 'accessories', 'carriers', 'shopSettings', 'agendaSettings'];
 const err = (status, msg) => Object.assign(new Error(msg), { status });
@@ -165,6 +166,21 @@ const OPS = {
     return { ok: true };
   },
 
+  // ---------- estatísticas do site ----------
+  async track({ staff, a, ip, req }) {
+    if (staff) return { ok: true };                       // a equipa não conta como visita
+    if (limited('tr' + ip, 2400, 3600e3)) return { ok: true };
+    return track(req, a, ip);
+  },
+  async stats({ staff, a }) {
+    if (!staff) throw err(403, 'Só a equipa.');
+    return stats(a);
+  },
+  async live({ staff, a }) {
+    if (!staff) throw err(403, 'Só a equipa.');
+    return live(a);
+  },
+
   // ---------- "tempo real": o site pergunta de x em x segundos o que mudou ----------
   async changes({ user, staff, a }) {
     const since = a.since ? new Date(a.since) : new Date(Date.now() - 60_000);
@@ -201,14 +217,16 @@ export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'Método não permitido' });
   if (!dbOn()) return json(503, { error: 'Base de dados não configurada.' });
   try {
-    const user = await getUser(req);
-    const staff = user ? await isStaffEmail(user.email) : false;
     const op = new URL(req.url).searchParams.get('op');
+    const a = op === 'upload' ? {} : await req.json().catch(() => ({}));
+    // estatísticas: quem não tem sessão iniciada não precisa de ir ver a conta (resposta mais rápida)
+    const hasSession = /session_token/.test(req.headers.get('cookie') || '');
+    const user = a.op === 'track' && !hasSession ? null : await getUser(req);
+    const staff = user ? await isStaffEmail(user.email) : false;
     if (op === 'upload') return await upload(req, staff);
-    const a = await req.json().catch(() => ({}));
     const fn = OPS[a.op];
     if (!fn) return json(400, { error: 'Pedido inválido' });
-    const data = await fn({ user, staff, a, ip: clientIp(req) });
+    const data = await fn({ user, staff, a, ip: clientIp(req), req });
     return json(200, { data });
   } catch (e) {
     if (e.status) return json(e.status, { error: e.message });

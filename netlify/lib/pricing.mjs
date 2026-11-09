@@ -27,6 +27,7 @@ export function optionGroups(item, type) {
     add('battery', item.battery ? `Saúde da bateria ${item.battery}%` : '', v.battery);
     add('storage', item.storage, v.storage);
   }
+  if (type !== 'device') add('model', item.model, v.model);   // acessórios: modelo do telemóvel (capas, películas…)
   add('color', item.color, v.color);
   return G;
 }
@@ -37,7 +38,12 @@ export function itemName(item, type) {
 
 // opts: {cond:'Excelente', color:'Preto', …} (nomes escolhidos pelo cliente)
 // devolve {unit, chosen:[{key,name}]} ou lança erro se a opção já não existir
+// capas e películas: os modelos disponíveis mudam muito, por isso o cliente pergunta no WhatsApp
+export const ASK_CATS = ['Capas', 'Películas'];
+export const askOnly = (item, type) => type !== 'device' && !!item && (item.ask === true || ASK_CATS.includes(item.cat));
+
 export function priceFor(item, type, opts = {}) {
+  if (askOnly(item, type)) throw new Error(`Para ${itemName(item, type)} pergunta-nos no WhatsApp que modelos temos (923 512 686).`);
   let p = Number(item.price) || 0;
   const chosen = [];
   for (const g of optionGroups(item, type)) {
