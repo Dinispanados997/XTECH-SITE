@@ -15,6 +15,18 @@
   ],
   "redirects": [
     {
+      "source": "/((?!api/).*)",
+      "has": [{ "type": "host", "value": "xtechsite.vercel.app" }],
+      "destination": "https://xtechstore.pt/$1",
+      "permanent": true
+    },
+    {
+      "source": "/((?!api/).*)",
+      "has": [{ "type": "host", "value": "www.xtechstore.pt" }],
+      "destination": "https://xtechstore.pt/$1",
+      "permanent": true
+    },
+    {
       "source": "/privacidade",
       "destination": "/#privacidade",
       "permanent": true
