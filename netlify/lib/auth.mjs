@@ -24,7 +24,9 @@ export function authOptions() {
     basePath: '/api/auth',
     secret: process.env.BETTER_AUTH_SECRET,
     database: pool(),
-    trustedOrigins: [site, process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : '', process.env.VERCEL_BRANCH_URL ? 'https://' + process.env.VERCEL_BRANCH_URL : ''].filter(Boolean),
+    // todos os endereços do site (o antigo do Vercel e o domínio .pt) podem fazer login
+    trustedOrigins: [site, 'https://xtechsite.vercel.app', 'https://xtechstore.pt', 'https://www.xtechstore.pt',
+      process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : '', process.env.VERCEL_BRANCH_URL ? 'https://' + process.env.VERCEL_BRANCH_URL : ''].filter(Boolean),
     user: { additionalFields: { meta: { type: 'json', required: false, input: false } } },
     account: { accountLinking: { enabled: true, trustedProviders: ['google'] } },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
