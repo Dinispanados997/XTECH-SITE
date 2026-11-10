@@ -301,6 +301,7 @@
       return staffFlag;
     },
     stats: (days)=> api('stats', { days }),
+    features: ()=> api('features'),
     live: (after)=> api('live', { after }),
     staff: {
       async add(email, name, role){ await api('staffAdd', { email, name, role }); },

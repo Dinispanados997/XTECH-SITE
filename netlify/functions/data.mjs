@@ -166,6 +166,11 @@ const OPS = {
     return { ok: true };
   },
 
+  // ---------- o que está ligado no servidor (para o site esconder o que não funciona) ----------
+  async features() {
+    return { google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) };
+  },
+
   // ---------- estatísticas do site ----------
   async track({ staff, a, ip, req }) {
     if (staff) return { ok: true };                       // a equipa não conta como visita
